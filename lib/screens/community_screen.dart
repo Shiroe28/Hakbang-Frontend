@@ -27,12 +27,22 @@ class _CommunityScreenState extends State<CommunityScreen> {
     });
 
     try {
+      print('🔄 CommunityScreen: Loading posts...');
       final postsData = await ApiService.getCommunityPosts();
+      print('📦 CommunityScreen: Received ${postsData.length} posts');
+      
+      final posts = postsData.map((json) {
+        print('📄 Post data: $json');
+        return Post.fromJson(json);
+      }).toList();
+      
       setState(() {
-        _posts = postsData.map((json) => Post.fromJson(json)).toList();
+        _posts = posts;
         _isLoading = false;
       });
+      print('✅ CommunityScreen: ${_posts.length} posts loaded successfully');
     } catch (e) {
+      print('❌ CommunityScreen: Error loading posts: $e');
       setState(() {
         _errorMessage = 'Failed to load posts. Please try again later.';
         _isLoading = false;

@@ -22,6 +22,9 @@ class _ModuleAssessmentScreenState extends State<ModuleAssessmentScreen> {
   bool _isSubmitting = false;
   final Map<int, String> _selectedAnswers = {};
   Map<String, dynamic>? _results;
+  
+  // Slideshow state
+  int _currentQuestionIndex = 0;
 
   @override
   void initState() {
@@ -132,9 +135,13 @@ class _ModuleAssessmentScreenState extends State<ModuleAssessmentScreen> {
       );
     }
 
+    final currentQuestion = _assessment!.questions[_currentQuestionIndex];
+    final totalQuestions = _assessment!.questions.length;
+    final isLastQuestion = _currentQuestionIndex == totalQuestions - 1;
+
     return Column(
       children: [
-        // Header
+        // Progress Header
         Container(
           width: double.infinity,
           padding: const EdgeInsets.all(20),
@@ -165,31 +172,152 @@ class _ModuleAssessmentScreenState extends State<ModuleAssessmentScreen> {
                   fontWeight: FontWeight.bold,
                 ),
               ),
-              const SizedBox(height: 8),
-              Text(
-                'Answer all ${_assessment!.questions.length} questions',
-                style: TextStyle(
-                  color: Colors.white.withOpacity(0.9),
-                  fontSize: 14,
-                ),
+              const SizedBox(height: 16),
+              // Progress Indicator
+              Row(
+                children: [
+                  Expanded(
+                    child: ClipRRect(
+                      borderRadius: BorderRadius.circular(10),
+                      child: LinearProgressIndicator(
+                        value: (_currentQuestionIndex + 1) / totalQuestions,
+                        backgroundColor: Colors.white.withOpacity(0.3),
+                        valueColor: const AlwaysStoppedAnimation<Color>(Colors.white),
+                        minHeight: 8,
+                      ),
+                    ),
+                  ),
+                  const SizedBox(width: 12),
+                  Text(
+                    '${_currentQuestionIndex + 1}/$totalQuestions',
+                    style: const TextStyle(
+                      color: Colors.white,
+                      fontSize: 16,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ],
               ),
             ],
           ),
         ),
 
-        // Questions List
+        // Current Question Card
         Expanded(
-          child: ListView.builder(
-            padding: const EdgeInsets.all(16),
-            itemCount: _assessment!.questions.length,
-            itemBuilder: (context, index) {
-              final question = _assessment!.questions[index];
-              return _buildQuestionCard(question, index);
-            },
+          child: SingleChildScrollView(
+            padding: const EdgeInsets.all(20),
+            child: Card(
+              elevation: 3,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(16),
+              ),
+              child: Padding(
+                padding: const EdgeInsets.all(24),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    // Question Number Badge
+                    Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                      decoration: BoxDecoration(
+                        color: Colors.blue,
+                        borderRadius: BorderRadius.circular(20),
+                      ),
+                      child: Text(
+                        'Question ${_currentQuestionIndex + 1}',
+                        style: const TextStyle(
+                          color: Colors.white,
+                          fontWeight: FontWeight.bold,
+                          fontSize: 14,
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: 20),
+
+                    // Question Text
+                    Text(
+                      currentQuestion.questionText,
+                      style: const TextStyle(
+                        fontSize: 18,
+                        fontWeight: FontWeight.w600,
+                        height: 1.4,
+                      ),
+                    ),
+                    const SizedBox(height: 24),
+
+                    // Options
+                    ...currentQuestion.options.asMap().entries.map((entry) {
+                      final optionIndex = entry.key;
+                      final optionText = entry.value;
+                      final isSelected = _selectedAnswers[_currentQuestionIndex] == optionText;
+
+                      return Padding(
+                        padding: const EdgeInsets.only(bottom: 12),
+                        child: InkWell(
+                          onTap: () {
+                            setState(() {
+                              _selectedAnswers[_currentQuestionIndex] = optionText;
+                            });
+                          },
+                          borderRadius: BorderRadius.circular(12),
+                          child: Container(
+                            padding: const EdgeInsets.all(16),
+                            decoration: BoxDecoration(
+                              color: isSelected
+                                  ? Colors.blue.withOpacity(0.1)
+                                  : Colors.grey.shade50,
+                              border: Border.all(
+                                color: isSelected ? Colors.blue : Colors.grey.shade300,
+                                width: isSelected ? 2 : 1,
+                              ),
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                            child: Row(
+                              children: [
+                                Container(
+                                  width: 28,
+                                  height: 28,
+                                  decoration: BoxDecoration(
+                                    shape: BoxShape.circle,
+                                    border: Border.all(
+                                      color: isSelected ? Colors.blue : Colors.grey,
+                                      width: 2,
+                                    ),
+                                    color: isSelected ? Colors.blue : Colors.transparent,
+                                  ),
+                                  child: isSelected
+                                      ? const Icon(
+                                          Icons.check,
+                                          size: 18,
+                                          color: Colors.white,
+                                        )
+                                      : null,
+                                ),
+                                const SizedBox(width: 16),
+                                Expanded(
+                                  child: Text(
+                                    '${String.fromCharCode(65 + optionIndex)}. $optionText',
+                                    style: TextStyle(
+                                      fontSize: 16,
+                                      fontWeight: isSelected ? FontWeight.w600 : FontWeight.normal,
+                                      color: isSelected ? Colors.blue.shade900 : Colors.black87,
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
+                      );
+                    }),
+                  ],
+                ),
+              ),
+            ),
           ),
         ),
 
-        // Submit Button
+        // Navigation Buttons
         Container(
           padding: const EdgeInsets.all(16),
           decoration: BoxDecoration(
@@ -203,156 +331,95 @@ class _ModuleAssessmentScreenState extends State<ModuleAssessmentScreen> {
             ],
           ),
           child: SafeArea(
-            child: SizedBox(
-              width: double.infinity,
-              child: ElevatedButton(
-                onPressed: _isSubmitting ? null : _submitAssessment,
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.blue,
-                  foregroundColor: Colors.white,
-                  padding: const EdgeInsets.symmetric(vertical: 16),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                ),
-                child: _isSubmitting
-                    ? const SizedBox(
-                        height: 20,
-                        width: 20,
-                        child: CircularProgressIndicator(
-                          strokeWidth: 2,
-                          valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
-                        ),
-                      )
-                    : Text(
-                        'Submit Assessment (${_selectedAnswers.length}/${_assessment!.questions.length})',
-                        style: const TextStyle(
-                          fontSize: 16,
-                          fontWeight: FontWeight.bold,
+            child: Row(
+              children: [
+                // Previous Button
+                if (_currentQuestionIndex > 0)
+                  Expanded(
+                    child: OutlinedButton.icon(
+                      onPressed: () {
+                        setState(() {
+                          _currentQuestionIndex--;
+                        });
+                      },
+                      icon: const Icon(Icons.arrow_back),
+                      label: const Text('Previous'),
+                      style: OutlinedButton.styleFrom(
+                        padding: const EdgeInsets.symmetric(vertical: 16),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12),
                         ),
                       ),
-              ),
-            ),
-          ),
-        ),
-      ],
-    );
-  }
-
-  Widget _buildQuestionCard(Question question, int index) {
-    return Card(
-      margin: const EdgeInsets.only(bottom: 16),
-      elevation: 2,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(12),
-      ),
-      child: Padding(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            // Question Number & Text
-            Row(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Container(
-                  padding: const EdgeInsets.all(8),
-                  decoration: BoxDecoration(
-                    color: Colors.blue,
-                    borderRadius: BorderRadius.circular(8),
-                  ),
-                  child: Text(
-                    '${index + 1}',
-                    style: const TextStyle(
-                      color: Colors.white,
-                      fontWeight: FontWeight.bold,
-                      fontSize: 16,
                     ),
                   ),
-                ),
-                const SizedBox(width: 12),
+                
+                if (_currentQuestionIndex > 0) const SizedBox(width: 12),
+                
+                // Next/Submit Button
                 Expanded(
-                  child: Text(
-                    question.questionText,
-                    style: const TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.w600,
-                      height: 1.4,
+                  flex: _currentQuestionIndex > 0 ? 1 : 2,
+                  child: ElevatedButton(
+                    onPressed: _isSubmitting
+                        ? null
+                        : () {
+                            if (!_selectedAnswers.containsKey(_currentQuestionIndex)) {
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                const SnackBar(
+                                  content: Text('Please select an answer'),
+                                  backgroundColor: Colors.orange,
+                                ),
+                              );
+                              return;
+                            }
+                            
+                            if (isLastQuestion) {
+                              _submitAssessment();
+                            } else {
+                              setState(() {
+                                _currentQuestionIndex++;
+                              });
+                            }
+                          },
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: isLastQuestion ? Colors.green : Colors.blue,
+                      foregroundColor: Colors.white,
+                      padding: const EdgeInsets.symmetric(vertical: 16),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
                     ),
+                    child: _isSubmitting
+                        ? const SizedBox(
+                            height: 20,
+                            width: 20,
+                            child: CircularProgressIndicator(
+                              strokeWidth: 2,
+                              valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                            ),
+                          )
+                        : Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Text(
+                                isLastQuestion ? 'Submit Assessment' : 'Next Question',
+                                style: const TextStyle(
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                              if (!isLastQuestion) ...[
+                                const SizedBox(width: 8),
+                                const Icon(Icons.arrow_forward),
+                              ],
+                            ],
+                          ),
                   ),
                 ),
               ],
             ),
-            const SizedBox(height: 16),
-
-            // Options
-            ...question.options.asMap().entries.map((entry) {
-              final optionIndex = entry.key;
-              final optionText = entry.value;
-              final isSelected = _selectedAnswers[index] == optionText;
-
-              return Padding(
-                padding: const EdgeInsets.only(bottom: 8),
-                child: InkWell(
-                  onTap: () {
-                    setState(() {
-                      _selectedAnswers[index] = optionText;
-                    });
-                  },
-                  borderRadius: BorderRadius.circular(8),
-                  child: Container(
-                    padding: const EdgeInsets.all(12),
-                    decoration: BoxDecoration(
-                      color: isSelected
-                          ? Colors.blue.withOpacity(0.1)
-                          : Colors.grey.shade50,
-                      border: Border.all(
-                        color: isSelected ? Colors.blue : Colors.grey.shade300,
-                        width: isSelected ? 2 : 1,
-                      ),
-                      borderRadius: BorderRadius.circular(8),
-                    ),
-                    child: Row(
-                      children: [
-                        Container(
-                          width: 24,
-                          height: 24,
-                          decoration: BoxDecoration(
-                            shape: BoxShape.circle,
-                            border: Border.all(
-                              color: isSelected ? Colors.blue : Colors.grey,
-                              width: 2,
-                            ),
-                            color: isSelected ? Colors.blue : Colors.transparent,
-                          ),
-                          child: isSelected
-                              ? const Icon(
-                                  Icons.check,
-                                  size: 16,
-                                  color: Colors.white,
-                                )
-                              : null,
-                        ),
-                        const SizedBox(width: 12),
-                        Expanded(
-                          child: Text(
-                            '${String.fromCharCode(65 + optionIndex)}. $optionText',
-                            style: TextStyle(
-                              fontSize: 15,
-                              fontWeight: isSelected ? FontWeight.w600 : FontWeight.normal,
-                              color: isSelected ? Colors.blue.shade900 : Colors.black87,
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
-              );
-            }).toList(),
-          ],
+          ),
         ),
-      ),
+      ],
     );
   }
 

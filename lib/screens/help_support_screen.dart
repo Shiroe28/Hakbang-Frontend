@@ -187,10 +187,10 @@ class HelpSupportScreen extends StatelessWidget {
             context,
             icon: Icons.email_outlined,
             title: 'Email Support',
-            subtitle: 'sam.richmond.go@gmail.com',
+            subtitle: 'Hakbang@gmail.com',
             onTap: () async {
               try {
-                await _launchURL('mailto:sam.richmond.go@gmail.com');
+                await _launchURL('mailto:Hakbang@gmail.com');
               } catch (e) {
                 if (context.mounted) {
                   ScaffoldMessenger.of(context).showSnackBar(
@@ -261,7 +261,7 @@ class HelpSupportScreen extends StatelessWidget {
                 _buildContactRow(
                   Icons.email,
                   'Email',
-                  'sam.richmond.go@gmail.com',
+                  'Hakbang@gmail.com',
                 ),
                 const Divider(),
                 _buildContactRow(

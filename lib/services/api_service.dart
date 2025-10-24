@@ -180,6 +180,9 @@ class ApiService {
       String url = '$baseUrl/learning/modules';
       if (careerId != null && careerId.isNotEmpty) {
         url += '?careerId=$careerId';
+        print('📤 Getting modules for career: $careerId');
+      } else {
+        print('📤 Getting all modules (no career filter)');
       }
 
       final response = await http.get(
@@ -187,17 +190,21 @@ class ApiService {
         headers: await _getHeaders(),
       );
 
+      print('📥 Modules response: ${response.statusCode}');
+
       if (response.statusCode == 200) {
         // Parse response as object first
         final Map<String, dynamic> responseData = jsonDecode(response.body);
         
         // Extract the modules list from the 'data' property
         final List<dynamic> data = responseData['data'] ?? [];
+        print('✅ Found ${data.length} modules for career: $careerId');
         return data.map((json) => Module.fromJson(json)).toList();
       } else {
         throw Exception('Failed to load modules');
       }
     } catch (e) {
+      print('❌ Error fetching modules: $e');
       throw Exception('Error fetching modules: $e');
     }
   }
@@ -224,18 +231,36 @@ class ApiService {
   /// Get assessment for a specific module
   static Future<Assessment> getAssessmentByModuleId(String moduleId) async {
     try {
+      print('📤 Getting assessment for module: $moduleId');
+      
       final response = await http.get(
         Uri.parse('$baseUrl/learning/assessments/module/$moduleId'),
         headers: await _getHeaders(),
       );
 
+      print('📥 Assessment response status: ${response.statusCode}');
+      print('📦 Assessment response body: ${response.body}');
+
       if (response.statusCode == 200) {
-        final data = jsonDecode(response.body);
-        return Assessment.fromJson(data);
+        final decoded = jsonDecode(response.body);
+        
+        // Backend returns: { success: true, data: {...assessment...} }
+        if (decoded is Map && decoded.containsKey('data')) {
+          print('✅ Assessment data found');
+          return Assessment.fromJson(Map<String, dynamic>.from(decoded['data']));
+        } else if (decoded is Map && decoded.containsKey('_id')) {
+          // Direct assessment object
+          return Assessment.fromJson(Map<String, dynamic>.from(decoded));
+        } else {
+          throw Exception('Unexpected response format');
+        }
+      } else if (response.statusCode == 404) {
+        throw Exception('No assessment found for this module');
       } else {
-        throw Exception('Failed to load assessment');
+        throw Exception('Failed to load assessment: ${response.statusCode}');
       }
     } catch (e) {
+      print('❌ Error fetching assessment: $e');
       throw Exception('Error fetching assessment: $e');
     }
   }
@@ -262,6 +287,9 @@ class ApiService {
     required List<int> answers,
   }) async {
     try {
+      print('📤 Submitting assessment: $assessmentId');
+      print('   Answers: $answers');
+      
       final response = await http.post(
         Uri.parse('$baseUrl/learning/assessments/$assessmentId/submit'),
         headers: await _getHeaders(needsAuth: true),
@@ -270,18 +298,40 @@ class ApiService {
         }),
       );
 
+      print('📥 Submit response status: ${response.statusCode}');
+      print('📦 Submit response body: ${response.body}');
+
       if (response.statusCode == 200) {
-        final data = jsonDecode(response.body);
-        return {
-          'success': true,
-          'score': data['score'],
-          'totalQuestions': data['totalQuestions'],
-          'percentage': data['percentage'],
-        };
+        final decoded = jsonDecode(response.body);
+        
+        // Backend returns: { success: true, data: { score, total, percentage, passed } }
+        if (decoded is Map && decoded.containsKey('data')) {
+          final data = decoded['data'];
+          return {
+            'success': true,
+            'score': data['score'] ?? 0,
+            'totalQuestions': data['total'] ?? answers.length,
+            'percentage': data['percentage'] ?? 0.0,
+            'passed': data['passed'] ?? false,
+          };
+        } else if (decoded is Map && decoded.containsKey('score')) {
+          // Direct response format
+          return {
+            'success': true,
+            'score': decoded['score'] ?? 0,
+            'totalQuestions': decoded['total'] ?? answers.length,
+            'percentage': decoded['percentage'] ?? 0.0,
+            'passed': decoded['passed'] ?? false,
+          };
+        } else {
+          return {'success': false, 'message': 'Unexpected response format'};
+        }
       } else {
-        return {'success': false, 'message': 'Failed to submit assessment'};
+        final error = jsonDecode(response.body);
+        return {'success': false, 'message': error['error'] ?? 'Failed to submit assessment'};
       }
     } catch (e) {
+      print('❌ Submit assessment error: $e');
       return {'success': false, 'message': 'Error: $e'};
     }
   }
@@ -478,22 +528,42 @@ class ApiService {
   /// Get all community posts
   static Future<List<Map<String, dynamic>>> getCommunityPosts() async {
     try {
+      print('📤 Fetching community posts...');
+      
       final response = await http.get(
         Uri.parse('$baseUrl/community/posts'),
         headers: await _getHeaders(),
       );
 
+      print('📥 Community posts response status: ${response.statusCode}');
+      print('📦 Community posts response body: ${response.body}');
+
       if (response.statusCode == 200) {
-        final data = jsonDecode(response.body);
-        if (data is Map && data.containsKey('data')) {
-          return List<Map<String, dynamic>>.from(data['data']);
+        final decoded = jsonDecode(response.body);
+        
+        // Backend returns: { success: true, data: [...posts...] }
+        if (decoded is Map && decoded.containsKey('data')) {
+          final List<dynamic> posts = decoded['data'];
+          print('✅ Found ${posts.length} community posts');
+          return List<Map<String, dynamic>>.from(
+            posts.map((post) => Map<String, dynamic>.from(post))
+          );
+        } else if (decoded is List) {
+          // Direct array format
+          print('✅ Found ${decoded.length} community posts (direct array)');
+          return List<Map<String, dynamic>>.from(
+            decoded.map((post) => Map<String, dynamic>.from(post))
+          );
         } else {
+          print('⚠️ Unexpected response format');
           return [];
         }
       } else {
-        throw Exception('Failed to load posts');
+        print('❌ Failed to load posts: ${response.statusCode}');
+        throw Exception('Failed to load posts: ${response.statusCode}');
       }
     } catch (e) {
+      print('❌ Error fetching posts: $e');
       throw Exception('Error fetching posts: $e');
     }
   }

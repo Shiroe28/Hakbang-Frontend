@@ -116,11 +116,7 @@ class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderSt
                         ),
                       ],
                     ),
-                    child: Icon(
-                      Icons.school_rounded,
-                      size: 80,
-                      color: Colors.blue[700],
-                    ),
+                    child: _buildLogo(context),
                   ),
                   const SizedBox(height: 32),
                   
@@ -166,4 +162,14 @@ class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderSt
       ),
     );
   }
+
+  Widget _buildLogo(BuildContext context) {
+    // Use icon for now - logo will be added later
+    return Icon(
+      Icons.school_rounded,
+      size: 80,
+      color: Colors.blue[700],
+    );
+  }
 }
+

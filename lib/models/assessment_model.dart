@@ -46,12 +46,14 @@ class Question {
 
   factory Question.fromJson(Map<String, dynamic> json) {
     return Question(
-      questionText: json['questionText'] ?? '',
+      // Backend might return 'question' OR 'questionText'
+      questionText: json['questionText'] ?? json['question'] ?? '',
       options: (json['options'] as List<dynamic>?)
               ?.map((o) => o.toString())
               .toList() ??
           [],
-      correctOption: json['correctOption'] ?? 0,
+      // Backend might return 'correctOption' OR 'correctAnswer'
+      correctOption: json['correctOption'] ?? json['correctAnswer'] ?? 0,
     );
   }
 

@@ -2,11 +2,12 @@
 
 ## 📋 Quick Summary
 
-Testing revealed **3 critical backend issues**:
+Testing revealed **4 critical backend issues**:
 
 1. ❌ **Resume AI Feedback** - Returns empty arrays, rating=0 (AI not working)
-2. ❌ **Profile Update** - Endpoint failing/missing
+2. ❌ **Profile Update** - Endpoint failing/doesn't save
 3. ❌ **Community Posts** - Not loading (route not registered)
+4. ❌ **Module Filtering** - Career shows ALL modules instead of career-specific ones
 
 ---
 
@@ -337,12 +338,108 @@ curl -X POST http://localhost:3000/api/community/posts \
 
 ---
 
+## ❌ ISSUE 4: Career Shows ALL Modules Instead of Filtered
+
+### Frontend Request:
+```
+GET /api/learning/modules?careerId=67891234567890abcdef
+```
+
+### THE PROBLEM:
+Backend **ignores the careerId parameter** and returns ALL modules in database!
+
+### Root Cause:
+Controller doesn't read `req.query.careerId` or doesn't filter by it.
+
+### Backend Must Fix:
+
+**File:** `controllers/learningController.js` (or similar)
+
+**Current (WRONG):**
+```javascript
+const getModules = async (req, res) => {
+  try {
+    // ❌ Ignores careerId from query params
+    const modules = await Module.find(); // Gets ALL modules
+    
+    res.json({ success: true, data: modules });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+};
+```
+
+**Should Be (CORRECT):**
+```javascript
+const getModules = async (req, res) => {
+  try {
+    const { careerId } = req.query; // ✅ Read from query string
+    
+    let query = {};
+    
+    // ✅ Filter by careerId if provided
+    if (careerId) {
+      query.careerId = careerId;
+      console.log(`Filtering modules for career: ${careerId}`);
+    } else {
+      console.log('Getting all modules (no filter)');
+    }
+    
+    const modules = await Module.find(query);
+    
+    console.log(`Found ${modules.length} modules`);
+    
+    res.json({ success: true, data: modules });
+  } catch (error) {
+    console.error('Get modules error:', error);
+    res.status(500).json({ error: error.message });
+  }
+};
+```
+
+### Test Commands:
+```bash
+# Get ALL modules (no filter)
+curl http://localhost:3000/api/learning/modules
+
+# Get modules for specific career ID
+curl "http://localhost:3000/api/learning/modules?careerId=YOUR_CAREER_ID"
+
+# COMPARE THE RESULTS:
+# - If same number of modules = Backend ignoring filter!
+# - If different number = Working correctly!
+
+# Example test:
+# 1. GET /api/learning/modules → Returns 50 modules
+# 2. GET /api/learning/modules?careerId=123 → Should return 5-10 modules
+# If both return 50 = BROKEN!
+```
+
+### What It Should Do:
+| Request | Expected Behavior |
+|---------|-------------------|
+| GET /api/learning/modules | Return ALL modules |
+| GET /api/learning/modules?careerId=123 | Return ONLY modules where `module.careerId === "123"` |
+
+### How User Sees The Problem:
+1. User takes career matching quiz
+2. Gets recommendation: "Full Stack Developer"
+3. Clicks on career
+4. Sees 50+ modules from ALL careers (❌ Wrong!)
+5. Should see only 8 modules for Full Stack Developer (✅ Correct)
+
+**Priority:** 🔴 **HIGH** - Major feature broken
+
+---
+
 ## ✅ WHAT TO PROMPT BACKEND
 
 Copy/paste this message to your backend developer:
 
 ```
-Hi, frontend testing found 3 critical issues:
+Hi Backend Team,
+
+Frontend testing found 4 critical issues:
 
 1. POST /api/ai/resume-feedback
    - AI not working - returns empty arrays
@@ -350,17 +447,22 @@ Hi, frontend testing found 3 critical issues:
    - Rating should be 1-10, not 0
    
 2. PUT /api/users/profile
-   - Endpoint failing or doesn't exist
-   - Should accept: { username, email }
-   - Return: { success, message, data }
+   - Returns success but doesn't save to database
+   - Need to check if user.save() is working
+   - Test: curl update → curl GET /api/users/me → should show new values
    
 3. GET /api/community/posts  
    - Routes not registered in server.js
    - Need to add: app.use('/api/community', communityRoutes)
 
+4. GET /api/learning/modules?careerId=123
+   - Ignores careerId parameter, returns ALL modules
+   - Need to read req.query.careerId and filter Module.find()
+   - Test: compare results with and without careerId param
+
 All test commands and code examples in: Frontend/docs/BACKEND_FIX.md
 
-Please test with curl commands BEFORE marking as done!
+Please test ALL with curl before marking as done!
 ```
 
 ---
@@ -370,8 +472,9 @@ Please test with curl commands BEFORE marking as done!
 After backend fixes each:
 
 1. **Resume:** Fill form → Get AI Feedback → See bullet points
-2. **Profile:** Edit → Change name → Save → Success message
+2. **Profile:** Edit → Change name → Save → Reload → See new name
 3. **Community:** Open tab → See posts → Can create new post
+4. **Career:** Take quiz → Click career → See only that career's modules
 
 **Test ALL with curl first, then tell frontend to test!**
 ```bash
