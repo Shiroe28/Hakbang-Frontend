@@ -31,14 +31,18 @@ class _CareerDetailScreenState extends State<CareerDetailScreen> {
     });
 
     try {
+      print('🎯 CareerDetailScreen: Loading modules for career ID: "${widget.career.id}"');
+      print('🎯 Career title: "${widget.career.title}"');
       final modules = await ApiService.getModules(careerId: widget.career.id);
       if (mounted) {
         setState(() {
           _modules = modules;
           _isLoading = false;
         });
+        print('✅ CareerDetailScreen: Loaded ${modules.length} modules');
       }
     } catch (e) {
+      print('❌ CareerDetailScreen: Error loading modules: $e');
       if (mounted) {
         setState(() {
           _errorMessage = e.toString();

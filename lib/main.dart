@@ -3,10 +3,14 @@ import 'package:provider/provider.dart';
 import 'screens/splash_screen.dart';
 import 'providers/user_provider.dart';
 import 'services/storage_service.dart';
+import 'config/network_config.dart';
 
 void main() async {
   // Initialize Flutter bindings
   WidgetsFlutterBinding.ensureInitialized();
+  
+  // Print network configuration for debugging
+  NetworkConfig.printConfig();
   
   // Create UserProvider
   final userProvider = UserProvider();

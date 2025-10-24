@@ -98,6 +98,16 @@ class _ModuleAssessmentScreenState extends State<ModuleAssessmentScreen> {
         };
         _isSubmitting = false;
       });
+
+      // Fetch updated badges after successful assessment
+      if ((results['percentage'] ?? 0) >= 70) {
+        try {
+          print('🎖️ Fetching updated badges after passing assessment...');
+          await ApiService.fetchUserBadges();
+        } catch (e) {
+          print('⚠️ Could not fetch badges: $e');
+        }
+      }
     } catch (e) {
       print('❌ Failed to submit assessment: $e');
       setState(() => _isSubmitting = false);

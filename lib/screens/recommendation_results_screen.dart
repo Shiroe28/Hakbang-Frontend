@@ -166,6 +166,7 @@ class RecommendationResultsScreen extends StatelessWidget {
       elevation: 2,
       child: InkWell(
         onTap: () {
+          print('🎯 Navigating to career: "${career.title}" with ID: "${career.id}"');
           Navigator.push(
             context,
             MaterialPageRoute(

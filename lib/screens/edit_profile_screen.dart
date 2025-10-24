@@ -1,7 +1,10 @@
+import 'package:flutter/foundation.dart' show Uint8List;
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:image_picker/image_picker.dart';
 import '../models/user_model.dart';
 import '../services/api_service.dart';
+import '../config/network_config.dart';
 import '../providers/user_provider.dart';
 
 class EditProfileScreen extends StatefulWidget {
@@ -18,6 +21,9 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
   late TextEditingController _usernameController;
   late TextEditingController _emailController;
   bool _isLoading = false;
+  Uint8List? _selectedImageBytes;
+  bool _isUploadingImage = false;
+  final ImagePicker _picker = ImagePicker();
 
   @override
   void initState() {
@@ -31,6 +37,118 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
     _usernameController.dispose();
     _emailController.dispose();
     super.dispose();
+  }
+
+  Future<void> _pickAndUploadImage() async {
+    try {
+      // Show image source selection dialog
+      final ImageSource? source = await showDialog<ImageSource>(
+        context: context,
+        builder: (BuildContext context) {
+          return AlertDialog(
+            title: const Text('Choose Image Source'),
+            content: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                ListTile(
+                  leading: const Icon(Icons.photo_library),
+                  title: const Text('Gallery'),
+                  onTap: () => Navigator.pop(context, ImageSource.gallery),
+                ),
+                ListTile(
+                  leading: const Icon(Icons.camera_alt),
+                  title: const Text('Camera'),
+                  onTap: () => Navigator.pop(context, ImageSource.camera),
+                ),
+              ],
+            ),
+          );
+        },
+      );
+
+      if (source == null) return;
+
+      // Pick image
+      final XFile? pickedFile = await _picker.pickImage(
+        source: source,
+        maxWidth: 1000,
+        maxHeight: 1000,
+        imageQuality: 85,
+      );
+
+      if (pickedFile == null) return;
+
+      // Read image bytes for preview FIRST
+      final imageBytes = await pickedFile.readAsBytes();
+
+      setState(() {
+        _selectedImageBytes = imageBytes;
+        _isUploadingImage = true;
+      });
+
+      print('📷 Selected image: ${pickedFile.name} (${imageBytes.length} bytes)');
+
+      // Upload image
+      print('☁️ Uploading profile picture...');
+      final uploadedUrl = await ApiService.uploadProfilePictureFromXFile(pickedFile);
+      print('✅ Profile picture uploaded successfully: $uploadedUrl');
+
+      if (!mounted) return;
+
+      // Refresh user data to get updated profile picture from server
+      final userProvider = Provider.of<UserProvider>(context, listen: false);
+      await userProvider.loadCurrentUser();
+
+      if (!mounted) return;
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Profile picture updated successfully!'),
+          backgroundColor: Colors.green,
+          duration: Duration(seconds: 2),
+        ),
+      );
+    } catch (e) {
+      print('❌ Error uploading profile picture: $e');
+      
+      // Clear preview on error
+      setState(() {
+        _selectedImageBytes = null;
+      });
+      
+      if (!mounted) return;
+      
+      // Extract more specific error message
+      String errorMsg = 'Failed to upload image';
+      if (e.toString().contains('HTTP 500')) {
+        errorMsg = 'Server error. Please try again or contact support.';
+      } else if (e.toString().contains('HTTP 413')) {
+        errorMsg = 'Image too large. Please choose a smaller image.';
+      } else if (e.toString().contains('HTTP 401')) {
+        errorMsg = 'Session expired. Please login again.';
+      } else if (e.toString().contains('Network')) {
+        errorMsg = 'Network error. Check your connection.';
+      }
+      
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(errorMsg),
+          backgroundColor: Colors.red,
+          duration: const Duration(seconds: 4),
+          action: SnackBarAction(
+            label: 'Retry',
+            textColor: Colors.white,
+            onPressed: () => _pickAndUploadImage(),
+          ),
+        ),
+      );
+    } finally {
+      if (mounted) {
+        setState(() {
+          _isUploadingImage = false;
+        });
+      }
+    }
   }
 
   Future<void> _saveProfile() async {
@@ -125,28 +243,52 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                       radius: 60,
                       backgroundColor:
                           Theme.of(context).primaryColor.withValues(alpha: 0.2),
-                      child: Icon(
-                        widget.user.role == 'student'
-                            ? Icons.school_rounded
-                            : Icons.workspace_premium_rounded,
-                        size: 60,
-                        color: Theme.of(context).primaryColor,
-                      ),
+                      backgroundImage: _selectedImageBytes != null
+                          ? MemoryImage(_selectedImageBytes!) as ImageProvider
+                          : (widget.user.profilePicture != null &&
+                                  widget.user.profilePicture!.isNotEmpty)
+                              ? NetworkImage(
+                                  '${NetworkConfig.baseUrlWithoutApi}${widget.user.profilePicture}') as ImageProvider
+                              : null,
+                      child: (_selectedImageBytes == null &&
+                              (widget.user.profilePicture == null ||
+                                  widget.user.profilePicture!.isEmpty))
+                          ? Icon(
+                              widget.user.role == 'student'
+                                  ? Icons.school_rounded
+                                  : Icons.workspace_premium_rounded,
+                              size: 60,
+                              color: Theme.of(context).primaryColor,
+                            )
+                          : null,
                     ),
+                    if (_isUploadingImage)
+                      Positioned.fill(
+                        child: CircleAvatar(
+                          radius: 60,
+                          backgroundColor: Colors.black54,
+                          child: const CircularProgressIndicator(
+                            color: Colors.white,
+                          ),
+                        ),
+                      ),
                     Positioned(
                       bottom: 0,
                       right: 0,
-                      child: Container(
-                        padding: const EdgeInsets.all(8),
-                        decoration: BoxDecoration(
-                          color: Theme.of(context).primaryColor,
-                          shape: BoxShape.circle,
-                          border: Border.all(color: Colors.white, width: 3),
-                        ),
-                        child: const Icon(
-                          Icons.camera_alt,
-                          color: Colors.white,
-                          size: 20,
+                      child: GestureDetector(
+                        onTap: _isUploadingImage ? null : _pickAndUploadImage,
+                        child: Container(
+                          padding: const EdgeInsets.all(8),
+                          decoration: BoxDecoration(
+                            color: Theme.of(context).primaryColor,
+                            shape: BoxShape.circle,
+                            border: Border.all(color: Colors.white, width: 3),
+                          ),
+                          child: const Icon(
+                            Icons.camera_alt,
+                            color: Colors.white,
+                            size: 20,
+                          ),
                         ),
                       ),
                     ),
@@ -156,7 +298,9 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
               const SizedBox(height: 8),
               Center(
                 child: Text(
-                  'Profile picture update coming soon',
+                  _isUploadingImage
+                      ? 'Uploading...'
+                      : 'Tap camera icon to change picture',
                   style: TextStyle(
                     color: Colors.grey[600],
                     fontSize: 12,

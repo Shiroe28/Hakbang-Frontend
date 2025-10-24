@@ -5,6 +5,7 @@ class Post {
   final String authorId;
   final String authorName;
   final String? authorRole;
+  final String? profilePicture;
   final DateTime createdAt;
   final int likes;
   final int comments;
@@ -16,6 +17,7 @@ class Post {
     required this.authorId,
     required this.authorName,
     this.authorRole,
+    this.profilePicture,
     required this.createdAt,
     this.likes = 0,
     this.comments = 0,
@@ -30,6 +32,7 @@ class Post {
       authorId: json['authorId'] ?? json['author']?['_id'] ?? '',
       authorName: json['authorName'] ?? json['author']?['username'] ?? 'Anonymous',
       authorRole: json['authorRole'] ?? json['author']?['role'],
+      profilePicture: json['profilePicture'] ?? json['author']?['profilePicture'],
       createdAt: json['createdAt'] != null
           ? DateTime.parse(json['createdAt'])
           : DateTime.now(),
@@ -47,6 +50,7 @@ class Post {
       'authorId': authorId,
       'authorName': authorName,
       'authorRole': authorRole,
+      'profilePicture': profilePicture,
       'createdAt': createdAt.toIso8601String(),
       'likes': likes,
       'comments': comments,

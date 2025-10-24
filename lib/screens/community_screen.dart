@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../models/post_model.dart';
 import '../services/api_service.dart';
+import '../config/network_config.dart';
 
 class CommunityScreen extends StatefulWidget {
   const CommunityScreen({super.key});
@@ -32,7 +33,7 @@ class _CommunityScreenState extends State<CommunityScreen> {
       print('📦 CommunityScreen: Received ${postsData.length} posts');
       
       final posts = postsData.map((json) {
-        print('📄 Post data: $json');
+        print('📄 Post data: ${json['_id']} - ${json['title']}');
         return Post.fromJson(json);
       }).toList();
       
@@ -44,7 +45,9 @@ class _CommunityScreenState extends State<CommunityScreen> {
     } catch (e) {
       print('❌ CommunityScreen: Error loading posts: $e');
       setState(() {
-        _errorMessage = 'Failed to load posts. Please try again later.';
+        _errorMessage = e.toString().contains('HTTP') || e.toString().contains('Failed')
+            ? 'Network error. Please check your connection and try again.'
+            : 'Failed to load posts. Please try again later.';
         _isLoading = false;
       });
     }
@@ -216,14 +219,20 @@ class _CommunityScreenState extends State<CommunityScreen> {
               Row(
                 children: [
                   CircleAvatar(
+                    radius: 20,
                     backgroundColor: Colors.blue.withValues(alpha: 0.2),
-                    child: Text(
-                      post.authorName[0].toUpperCase(),
-                      style: const TextStyle(
-                        color: Colors.blue,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
+                    backgroundImage: post.profilePicture != null && post.profilePicture!.isNotEmpty
+                        ? NetworkImage('${NetworkConfig.baseUrlWithoutApi}${post.profilePicture}')
+                        : null,
+                    child: post.profilePicture == null || post.profilePicture!.isEmpty
+                        ? Text(
+                            post.authorName[0].toUpperCase(),
+                            style: const TextStyle(
+                              color: Colors.blue,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          )
+                        : null,
                   ),
                   const SizedBox(width: 12),
                   Expanded(
