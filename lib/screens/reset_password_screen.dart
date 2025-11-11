@@ -83,7 +83,8 @@ class _ResetPasswordScreenState extends State<ResetPasswordScreen> {
         setState(() => _isLoading = false);
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Error: ${e.toString().replaceAll('Exception: ', '')}'),
+            content:
+                Text('Error: ${e.toString().replaceAll('Exception: ', '')}'),
             backgroundColor: Colors.red,
           ),
         );
@@ -106,7 +107,6 @@ class _ResetPasswordScreenState extends State<ResetPasswordScreen> {
           'Forgot Password',
           style: TextStyle(
             color: Colors.black,
-            
             fontWeight: FontWeight.bold,
           ),
         ),
@@ -137,7 +137,6 @@ class _ResetPasswordScreenState extends State<ResetPasswordScreen> {
                   style: TextStyle(
                     fontSize: 24,
                     fontWeight: FontWeight.bold,
-                    
                   ),
                   textAlign: TextAlign.center,
                 ),
@@ -150,7 +149,6 @@ class _ResetPasswordScreenState extends State<ResetPasswordScreen> {
                   style: TextStyle(
                     fontSize: 14,
                     color: Colors.grey[600],
-                    
                   ),
                   textAlign: TextAlign.center,
                 ),
@@ -165,7 +163,6 @@ class _ResetPasswordScreenState extends State<ResetPasswordScreen> {
                   decoration: InputDecoration(
                     hintText: 'Email Address',
                     hintStyle: const TextStyle(
-                      
                       color: Colors.grey,
                     ),
                     prefixIcon: Container(
@@ -213,7 +210,6 @@ class _ResetPasswordScreenState extends State<ResetPasswordScreen> {
                           style: TextStyle(
                             fontSize: 16,
                             fontWeight: FontWeight.bold,
-                            
                           ),
                         ),
                 ),
@@ -233,15 +229,17 @@ class _ResetPasswordScreenState extends State<ResetPasswordScreen> {
                       Icon(
                         Icons.arrow_back,
                         size: 18,
-                        color: _isLoading ? Colors.grey : const Color(0xFF2c6894),
+                        color:
+                            _isLoading ? Colors.grey : const Color(0xFF2c6894),
                       ),
                       const SizedBox(width: 8),
                       Text(
                         'Back to Login',
                         style: TextStyle(
-                          color: _isLoading ? Colors.grey : const Color(0xFF2c6894),
+                          color: _isLoading
+                              ? Colors.grey
+                              : const Color(0xFF2c6894),
                           fontWeight: FontWeight.w600,
-                          
                         ),
                       ),
                     ],
@@ -276,7 +274,6 @@ class _ResetPasswordScreenState extends State<ResetPasswordScreen> {
                           style: TextStyle(
                             color: Colors.grey[700],
                             fontSize: 12,
-                            
                           ),
                         ),
                       ),

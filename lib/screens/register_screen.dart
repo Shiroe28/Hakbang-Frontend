@@ -63,7 +63,8 @@ class _RegisterScreenState extends State<RegisterScreen> {
             token: loginResult['token'],
             role: loginResult['role'],
             userId: loginResult['user']?['_id'] ?? loginResult['user']?['id'],
-            username: loginResult['user']?['username'] ?? loginResult['user']?['name'],  // Handle both fields
+            username: loginResult['user']?['username'] ??
+                loginResult['user']?['name'], // Handle both fields
             email: loginResult['user']?['email'],
           );
 
@@ -126,7 +127,6 @@ class _RegisterScreenState extends State<RegisterScreen> {
           'Create Account',
           style: TextStyle(
             color: Colors.black,
-            
             fontWeight: FontWeight.bold,
           ),
         ),
@@ -155,7 +155,6 @@ class _RegisterScreenState extends State<RegisterScreen> {
                   decoration: InputDecoration(
                     hintText: 'Username',
                     hintStyle: const TextStyle(
-                      
                       color: Colors.grey,
                     ),
                     prefixIcon: Container(
@@ -193,7 +192,6 @@ class _RegisterScreenState extends State<RegisterScreen> {
                   decoration: InputDecoration(
                     hintText: 'Email',
                     hintStyle: const TextStyle(
-                      
                       color: Colors.grey,
                     ),
                     prefixIcon: Container(
@@ -231,7 +229,6 @@ class _RegisterScreenState extends State<RegisterScreen> {
                   decoration: InputDecoration(
                     hintText: 'Password',
                     hintStyle: const TextStyle(
-                      
                       color: Colors.grey,
                     ),
                     prefixIcon: Container(
@@ -282,7 +279,6 @@ class _RegisterScreenState extends State<RegisterScreen> {
                   decoration: InputDecoration(
                     hintText: 'Confirm Password',
                     hintStyle: const TextStyle(
-                      
                       color: Colors.grey,
                     ),
                     prefixIcon: Container(
@@ -333,7 +329,6 @@ class _RegisterScreenState extends State<RegisterScreen> {
                     style: TextStyle(
                       fontSize: 14,
                       color: Colors.black87,
-                      
                     ),
                   ),
                 ),
@@ -348,7 +343,6 @@ class _RegisterScreenState extends State<RegisterScreen> {
                   child: DropdownButtonFormField<String>(
                     value: _selectedRole,
                     style: const TextStyle(
-                      
                       color: Colors.black,
                       fontSize: 16,
                     ),
@@ -407,7 +401,6 @@ class _RegisterScreenState extends State<RegisterScreen> {
                           style: TextStyle(
                             fontSize: 16,
                             fontWeight: FontWeight.bold,
-                            
                           ),
                         ),
                 ),
@@ -421,7 +414,6 @@ class _RegisterScreenState extends State<RegisterScreen> {
                       'Already have an account? ',
                       style: TextStyle(
                         color: Colors.black,
-                        
                         fontSize: 14,
                       ),
                     ),
@@ -439,7 +431,6 @@ class _RegisterScreenState extends State<RegisterScreen> {
                         style: TextStyle(
                           color: Color(0xFF2c6894),
                           fontWeight: FontWeight.bold,
-                          
                           fontSize: 14,
                         ),
                       ),
