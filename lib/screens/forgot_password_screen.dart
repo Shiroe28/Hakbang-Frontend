@@ -68,13 +68,27 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: Colors.white,
       appBar: AppBar(
-        title: const Text('Forgot Password'),
+        backgroundColor: Colors.white,
+        elevation: 0,
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back, color: Colors.black),
+          onPressed: () => Navigator.pop(context),
+        ),
+        title: const Text(
+          'Forgot Password',
+          style: TextStyle(
+            color: Colors.black,
+            
+            fontWeight: FontWeight.bold,
+          ),
+        ),
         centerTitle: true,
       ),
       body: SafeArea(
         child: SingleChildScrollView(
-          padding: const EdgeInsets.all(24),
+          padding: const EdgeInsets.all(32),
           child: Form(
             key: _formKey,
             child: Column(
@@ -83,27 +97,22 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
                 const SizedBox(height: 20),
 
                 // Icon
-                Container(
-                  padding: const EdgeInsets.all(20),
-                  decoration: BoxDecoration(
-                    color: Theme.of(context).primaryColor.withOpacity(0.1),
-                    shape: BoxShape.circle,
-                  ),
-                  child: Icon(
-                    Icons.lock_reset_rounded,
-                    size: 80,
-                    color: Theme.of(context).primaryColor,
-                  ),
+                const Icon(
+                  Icons.lock_reset_rounded,
+                  size: 80,
+                  color: Colors.black,
                 ),
 
                 const SizedBox(height: 32),
 
                 // Title
-                Text(
+                const Text(
                   'Reset Your Password',
-                  style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                        fontWeight: FontWeight.bold,
-                      ),
+                  style: TextStyle(
+                    fontSize: 24,
+                    fontWeight: FontWeight.bold,
+                    
+                  ),
                   textAlign: TextAlign.center,
                 ),
 
@@ -111,10 +120,12 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
 
                 // Description
                 Text(
-                  'Enter your email address and we\'ll send you a code to reset your password.',
-                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                        color: Colors.grey[600],
-                      ),
+                  'Enter you email address and we\'ll send you a code to reset your password.',
+                  style: TextStyle(
+                    fontSize: 14,
+                    color: Colors.grey[600],
+                    
+                  ),
                   textAlign: TextAlign.center,
                 ),
 
@@ -125,15 +136,27 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
                   controller: _emailController,
                   keyboardType: TextInputType.emailAddress,
                   autofillHints: const [AutofillHints.email],
+                  style: const TextStyle(fontFamily: 'GlacialIndifference'),
                   decoration: InputDecoration(
-                    labelText: 'Email Address',
-                    hintText: 'Enter your email',
-                    prefixIcon: const Icon(Icons.email_outlined),
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(12),
+                    hintText: 'Email Address',
+                    hintStyle: const TextStyle(
+                      
+                      color: Colors.grey,
+                    ),
+                    prefixIcon: Container(
+                      padding: const EdgeInsets.all(12),
+                      child: const Icon(Icons.email_outlined, size: 20),
                     ),
                     filled: true,
-                    fillColor: Colors.grey[50],
+                    fillColor: Colors.grey[100],
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(30),
+                      borderSide: BorderSide.none,
+                    ),
+                    contentPadding: const EdgeInsets.symmetric(
+                      horizontal: 20,
+                      vertical: 16,
+                    ),
                   ),
                   validator: (value) {
                     if (value == null || value.isEmpty) {
@@ -153,10 +176,13 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
                 ElevatedButton(
                   onPressed: _isLoading ? null : _sendResetCode,
                   style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.black,
+                    foregroundColor: Colors.white,
                     padding: const EdgeInsets.symmetric(vertical: 16),
                     shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(12),
+                      borderRadius: BorderRadius.circular(30),
                     ),
+                    elevation: 0,
                   ),
                   child: _isLoading
                       ? const SizedBox(
@@ -172,6 +198,7 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
                           style: TextStyle(
                             fontSize: 16,
                             fontWeight: FontWeight.bold,
+                            
                           ),
                         ),
                 ),
@@ -191,14 +218,15 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
                       Icon(
                         Icons.arrow_back,
                         size: 18,
-                        color: Theme.of(context).primaryColor,
+                        color: _isLoading ? Colors.grey : const Color(0xFF2c6894),
                       ),
                       const SizedBox(width: 8),
                       Text(
                         'Back to Login',
                         style: TextStyle(
-                          color: Theme.of(context).primaryColor,
+                          color: _isLoading ? Colors.grey : const Color(0xFF2c6894),
                           fontWeight: FontWeight.w600,
+                          
                         ),
                       ),
                     ],
@@ -211,27 +239,29 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
                 Container(
                   padding: const EdgeInsets.all(16),
                   decoration: BoxDecoration(
-                    color: Colors.blue[50],
+                    color: Colors.grey[100],
                     borderRadius: BorderRadius.circular(12),
                     border: Border.all(
-                      color: Colors.blue[200]!,
+                      color: Colors.grey[300]!,
                       width: 1,
                     ),
                   ),
                   child: Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Icon(
                         Icons.info_outline,
-                        color: Colors.blue[700],
-                        size: 24,
+                        color: Colors.grey[700],
+                        size: 20,
                       ),
                       const SizedBox(width: 12),
                       Expanded(
                         child: Text(
                           'The reset code will expire in 15 minutes. If you don\'t receive it, check your spam folder.',
                           style: TextStyle(
-                            color: Colors.blue[900],
-                            fontSize: 13,
+                            color: Colors.grey[700],
+                            fontSize: 12,
+                            
                           ),
                         ),
                       ),

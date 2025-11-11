@@ -43,21 +43,21 @@ class HakbangApp extends StatelessWidget {
       debugShowCheckedModeBanner: false,
       theme: ThemeData(
         primarySwatch: Colors.blue,
-        primaryColor: Colors.blue[700],
+        primaryColor: const Color(0xFF2c6894),
         colorScheme: ColorScheme.fromSeed(
-          seedColor: Colors.blue,
+          seedColor: const Color(0xFF2c6894),
           brightness: Brightness.light,
         ),
         useMaterial3: true,
-        appBarTheme: AppBarTheme(
+        appBarTheme: const AppBarTheme(
           elevation: 0,
           centerTitle: true,
-          backgroundColor: Colors.blue[700],
+          backgroundColor: Color(0xFF2c6894),
           foregroundColor: Colors.white,
         ),
         elevatedButtonTheme: ElevatedButtonThemeData(
           style: ElevatedButton.styleFrom(
-            backgroundColor: Colors.blue[700],
+            backgroundColor: const Color(0xFF2c6894),
             foregroundColor: Colors.white,
             elevation: 2,
           ),
@@ -75,7 +75,7 @@ class HakbangApp extends StatelessWidget {
           ),
           focusedBorder: OutlineInputBorder(
             borderRadius: BorderRadius.circular(12),
-            borderSide: BorderSide(color: Colors.blue[700]!, width: 2),
+            borderSide: const BorderSide(color: Color(0xFF2c6894), width: 2),
           ),
           errorBorder: OutlineInputBorder(
             borderRadius: BorderRadius.circular(12),

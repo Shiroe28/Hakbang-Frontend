@@ -83,92 +83,24 @@ class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderSt
   Widget build(BuildContext context) {
     return Scaffold(
       body: Container(
-        decoration: BoxDecoration(
-          gradient: LinearGradient(
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
-            colors: [
-              Colors.blue[700]!,
-              Colors.blue[500]!,
-              Colors.blue[300]!,
-            ],
-          ),
+        decoration: const BoxDecoration(
+          color: Color(0xFF2c6894), // Azure blue
         ),
         child: Center(
           child: FadeTransition(
             opacity: _fadeAnimation,
             child: ScaleTransition(
               scale: _scaleAnimation,
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  // App Logo/Icon
-                  Container(
-                    padding: const EdgeInsets.all(24),
-                    decoration: BoxDecoration(
-                      color: Colors.white,
-                      borderRadius: BorderRadius.circular(30),
-                      boxShadow: [
-                        BoxShadow(
-                          color: Colors.black.withValues(alpha: 0.2),
-                          blurRadius: 20,
-                          offset: const Offset(0, 10),
-                        ),
-                      ],
-                    ),
-                    child: _buildLogo(context),
-                  ),
-                  const SizedBox(height: 32),
-                  
-                  // App Name
-                  const Text(
-                    'Hakbang',
-                    style: TextStyle(
-                      fontSize: 48,
-                      fontWeight: FontWeight.bold,
-                      color: Colors.white,
-                      letterSpacing: 2,
-                    ),
-                  ),
-                  const SizedBox(height: 8),
-                  
-                  // Tagline
-                  Text(
-                    'Your AI-Powered Career Tracker',
-                    style: TextStyle(
-                      fontSize: 16,
-                      color: Colors.white.withValues(alpha: 0.9),
-                      letterSpacing: 1,
-                    ),
-                  ),
-                  const SizedBox(height: 48),
-                  
-                  // Loading Indicator
-                  SizedBox(
-                    width: 40,
-                    height: 40,
-                    child: CircularProgressIndicator(
-                      valueColor: AlwaysStoppedAnimation<Color>(
-                        Colors.white.withValues(alpha: 0.8),
-                      ),
-                      strokeWidth: 3,
-                    ),
-                  ),
-                ],
+              child: Image.asset(
+                'assets/images/logo.png',
+                width: 250,
+                height: 250,
+                fit: BoxFit.contain,
               ),
             ),
           ),
         ),
       ),
-    );
-  }
-
-  Widget _buildLogo(BuildContext context) {
-    // Use icon for now - logo will be added later
-    return Icon(
-      Icons.school_rounded,
-      size: 80,
-      color: Colors.blue[700],
     );
   }
 }

@@ -20,8 +20,6 @@ class _ResetPasswordScreenState extends State<ResetPasswordScreen> {
   final _passwordController = TextEditingController();
   final _confirmPasswordController = TextEditingController();
   bool _isLoading = false;
-  bool _obscurePassword = true;
-  bool _obscureConfirmPassword = true;
 
   @override
   void dispose() {
@@ -96,13 +94,27 @@ class _ResetPasswordScreenState extends State<ResetPasswordScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: Colors.white,
       appBar: AppBar(
-        title: const Text('Reset Password'),
+        backgroundColor: Colors.white,
+        elevation: 0,
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back, color: Colors.black),
+          onPressed: () => Navigator.pop(context),
+        ),
+        title: const Text(
+          'Forgot Password',
+          style: TextStyle(
+            color: Colors.black,
+            
+            fontWeight: FontWeight.bold,
+          ),
+        ),
         centerTitle: true,
       ),
       body: SafeArea(
         child: SingleChildScrollView(
-          padding: const EdgeInsets.all(24),
+          padding: const EdgeInsets.all(32),
           child: Form(
             key: _formKey,
             child: Column(
@@ -111,27 +123,22 @@ class _ResetPasswordScreenState extends State<ResetPasswordScreen> {
                 const SizedBox(height: 20),
 
                 // Icon
-                Container(
-                  padding: const EdgeInsets.all(20),
-                  decoration: BoxDecoration(
-                    color: Theme.of(context).primaryColor.withOpacity(0.1),
-                    shape: BoxShape.circle,
-                  ),
-                  child: Icon(
-                    Icons.vpn_key_rounded,
-                    size: 80,
-                    color: Theme.of(context).primaryColor,
-                  ),
+                const Icon(
+                  Icons.lock_reset_rounded,
+                  size: 80,
+                  color: Colors.black,
                 ),
 
                 const SizedBox(height: 32),
 
                 // Title
-                Text(
-                  'Enter Reset Code',
-                  style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                        fontWeight: FontWeight.bold,
-                      ),
+                const Text(
+                  'Reset Your Password',
+                  style: TextStyle(
+                    fontSize: 24,
+                    fontWeight: FontWeight.bold,
+                    
+                  ),
                   textAlign: TextAlign.center,
                 ),
 
@@ -139,128 +146,58 @@ class _ResetPasswordScreenState extends State<ResetPasswordScreen> {
 
                 // Description
                 Text(
-                  'We sent a 6-digit code to\n${widget.email}',
-                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                        color: Colors.grey[600],
-                      ),
+                  'Enter you email address and we\'ll send you a code to reset your password.',
+                  style: TextStyle(
+                    fontSize: 14,
+                    color: Colors.grey[600],
+                    
+                  ),
                   textAlign: TextAlign.center,
                 ),
 
                 const SizedBox(height: 40),
 
-                // Code Field
+                // Email Field (read-only, showing the email)
                 TextFormField(
-                  controller: _codeController,
-                  keyboardType: TextInputType.number,
-                  maxLength: 6,
+                  initialValue: widget.email,
+                  enabled: false,
+                  style: const TextStyle(fontFamily: 'GlacialIndifference'),
                   decoration: InputDecoration(
-                    labelText: 'Reset Code',
-                    hintText: 'Enter 6-digit code',
-                    prefixIcon: const Icon(Icons.pin_outlined),
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(12),
+                    hintText: 'Email Address',
+                    hintStyle: const TextStyle(
+                      
+                      color: Colors.grey,
+                    ),
+                    prefixIcon: Container(
+                      padding: const EdgeInsets.all(12),
+                      child: const Icon(Icons.email_outlined, size: 20),
                     ),
                     filled: true,
-                    fillColor: Colors.grey[50],
-                    counterText: '',
-                  ),
-                  validator: (value) {
-                    if (value == null || value.isEmpty) {
-                      return 'Please enter the reset code';
-                    }
-                    if (value.length != 6) {
-                      return 'Code must be 6 digits';
-                    }
-                    return null;
-                  },
-                  enabled: !_isLoading,
-                ),
-
-                const SizedBox(height: 20),
-
-                // New Password Field
-                TextFormField(
-                  controller: _passwordController,
-                  obscureText: _obscurePassword,
-                  decoration: InputDecoration(
-                    labelText: 'New Password',
-                    hintText: 'Enter new password',
-                    prefixIcon: const Icon(Icons.lock_outline),
-                    suffixIcon: IconButton(
-                      icon: Icon(
-                        _obscurePassword ? Icons.visibility : Icons.visibility_off,
-                      ),
-                      onPressed: () {
-                        setState(() => _obscurePassword = !_obscurePassword);
-                      },
-                    ),
+                    fillColor: Colors.grey[200],
                     border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(12),
+                      borderRadius: BorderRadius.circular(30),
+                      borderSide: BorderSide.none,
                     ),
-                    filled: true,
-                    fillColor: Colors.grey[50],
+                    contentPadding: const EdgeInsets.symmetric(
+                      horizontal: 20,
+                      vertical: 16,
+                    ),
                   ),
-                  validator: (value) {
-                    if (value == null || value.isEmpty) {
-                      return 'Please enter new password';
-                    }
-                    if (value.length < 6) {
-                      return 'Password must be at least 6 characters';
-                    }
-                    return null;
-                  },
-                  enabled: !_isLoading,
                 ),
 
-                const SizedBox(height: 20),
+                const SizedBox(height: 24),
 
-                // Confirm Password Field
-                TextFormField(
-                  controller: _confirmPasswordController,
-                  obscureText: _obscureConfirmPassword,
-                  decoration: InputDecoration(
-                    labelText: 'Confirm Password',
-                    hintText: 'Re-enter new password',
-                    prefixIcon: const Icon(Icons.lock_outline),
-                    suffixIcon: IconButton(
-                      icon: Icon(
-                        _obscureConfirmPassword
-                            ? Icons.visibility
-                            : Icons.visibility_off,
-                      ),
-                      onPressed: () {
-                        setState(
-                            () => _obscureConfirmPassword = !_obscureConfirmPassword);
-                      },
-                    ),
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                    filled: true,
-                    fillColor: Colors.grey[50],
-                  ),
-                  validator: (value) {
-                    if (value == null || value.isEmpty) {
-                      return 'Please confirm your password';
-                    }
-                    if (value != _passwordController.text) {
-                      return 'Passwords do not match';
-                    }
-                    return null;
-                  },
-                  enabled: !_isLoading,
-                ),
-
-                const SizedBox(height: 32),
-
-                // Reset Button
+                // Send Code Button
                 ElevatedButton(
                   onPressed: _isLoading ? null : _resetPassword,
                   style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.black,
+                    foregroundColor: Colors.white,
                     padding: const EdgeInsets.symmetric(vertical: 16),
                     shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(12),
+                      borderRadius: BorderRadius.circular(30),
                     ),
+                    elevation: 0,
                   ),
                   child: _isLoading
                       ? const SizedBox(
@@ -272,31 +209,43 @@ class _ResetPasswordScreenState extends State<ResetPasswordScreen> {
                           ),
                         )
                       : const Text(
-                          'Reset Password',
+                          'Send Reset Code',
                           style: TextStyle(
                             fontSize: 16,
                             fontWeight: FontWeight.bold,
+                            
                           ),
                         ),
                 ),
 
                 const SizedBox(height: 24),
 
-                // Resend Code Button
-                OutlinedButton(
+                // Back to Login
+                TextButton(
                   onPressed: _isLoading
                       ? null
                       : () {
-                          // Go back to forgot password screen to resend
                           Navigator.pop(context);
                         },
-                  style: OutlinedButton.styleFrom(
-                    padding: const EdgeInsets.symmetric(vertical: 12),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(12),
-                    ),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Icon(
+                        Icons.arrow_back,
+                        size: 18,
+                        color: _isLoading ? Colors.grey : const Color(0xFF2c6894),
+                      ),
+                      const SizedBox(width: 8),
+                      Text(
+                        'Back to Login',
+                        style: TextStyle(
+                          color: _isLoading ? Colors.grey : const Color(0xFF2c6894),
+                          fontWeight: FontWeight.w600,
+                          
+                        ),
+                      ),
+                    ],
                   ),
-                  child: const Text('Didn\'t receive code? Resend'),
                 ),
 
                 const SizedBox(height: 40),
@@ -305,27 +254,29 @@ class _ResetPasswordScreenState extends State<ResetPasswordScreen> {
                 Container(
                   padding: const EdgeInsets.all(16),
                   decoration: BoxDecoration(
-                    color: Colors.orange[50],
+                    color: Colors.grey[100],
                     borderRadius: BorderRadius.circular(12),
                     border: Border.all(
-                      color: Colors.orange[200]!,
+                      color: Colors.grey[300]!,
                       width: 1,
                     ),
                   ),
                   child: Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Icon(
-                        Icons.timer_outlined,
-                        color: Colors.orange[700],
-                        size: 24,
+                        Icons.info_outline,
+                        color: Colors.grey[700],
+                        size: 20,
                       ),
                       const SizedBox(width: 12),
                       Expanded(
                         child: Text(
-                          'Your reset code will expire in 15 minutes.',
+                          'The reset code will expire in 15 minutes. If you don\'t receive it, check your spam folder.',
                           style: TextStyle(
-                            color: Colors.orange[900],
-                            fontSize: 13,
+                            color: Colors.grey[700],
+                            fontSize: 12,
+                            
                           ),
                         ),
                       ),
