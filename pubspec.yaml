@@ -25,6 +25,9 @@ dependencies:
   # UI components
   cupertino_icons: ^1.0.2
   
+  # Google Fonts
+  google_fonts: ^6.1.0
+  
   # Image picker for profile pictures
   image_picker: ^1.0.7
 
