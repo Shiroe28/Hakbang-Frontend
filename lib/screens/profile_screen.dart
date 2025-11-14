@@ -29,12 +29,12 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
   Future<void> _loadUserData() async {
     final userProvider = Provider.of<UserProvider>(context, listen: false);
-    
+
     // Load from API if not already loaded
     if (userProvider.user == null) {
       await userProvider.loadCurrentUser();
     }
-    
+
     // Use data from UserProvider if available
     if (userProvider.user != null) {
       setState(() {
@@ -137,206 +137,216 @@ class _ProfileScreenState extends State<ProfileScreen> {
           ),
           Expanded(
             child: SingleChildScrollView(
-        padding: const EdgeInsets.all(24),
-        child: Column(
-          children: [
-            // Profile Avatar
-            CircleAvatar(
-              radius: 60,
-              backgroundColor: Theme.of(context).primaryColor.withValues(alpha: 0.2),
-              child: Icon(
-                _role == 'student'
-                    ? Icons.school_rounded
-                    : Icons.workspace_premium_rounded,
-                size: 60,
-                color: Theme.of(context).primaryColor,
-              ),
-            ),
-            const SizedBox(height: 24),
-
-            // Username
-            Text(
-              _username ?? 'User',
-              style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                    fontWeight: FontWeight.bold,
-                  ),
-            ),
-            const SizedBox(height: 8),
-
-            // Role Badge
-            Container(
-              padding: const EdgeInsets.symmetric(
-                horizontal: 16,
-                vertical: 8,
-              ),
-              decoration: BoxDecoration(
-                color: _role == 'student' ? Colors.blue[100] : Colors.purple[100],
-                borderRadius: BorderRadius.circular(20),
-              ),
-              child: Text(
-                _role == 'student' ? 'STUDENT' : 'MENTOR',
-                style: TextStyle(
-                  color: _role == 'student' ? Colors.blue[900] : Colors.purple[900],
-                  fontWeight: FontWeight.bold,
-                  fontSize: 14,
-                ),
-              ),
-            ),
-            const SizedBox(height: 32),
-
-            // Profile Information Card
-            Card(
-              elevation: 2,
+              padding: const EdgeInsets.all(24),
               child: Column(
                 children: [
-                  _buildInfoTile(
-                    icon: Icons.person_rounded,
-                    title: 'Username',
-                    value: _username ?? 'N/A',
+                  // Profile Avatar
+                  CircleAvatar(
+                    radius: 60,
+                    backgroundColor:
+                        Theme.of(context).primaryColor.withValues(alpha: 0.2),
+                    child: Icon(
+                      _role == 'student'
+                          ? Icons.school_rounded
+                          : Icons.workspace_premium_rounded,
+                      size: 60,
+                      color: Theme.of(context).primaryColor,
+                    ),
                   ),
-                  const Divider(height: 1),
-                  _buildInfoTile(
-                    icon: Icons.email_rounded,
-                    title: 'Email',
-                    value: _email ?? 'N/A',
+                  const SizedBox(height: 24),
+
+                  // Username
+                  Text(
+                    _username ?? 'User',
+                    style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+                          fontWeight: FontWeight.bold,
+                        ),
                   ),
-                  const Divider(height: 1),
-                  _buildInfoTile(
-                    icon: Icons.badge_rounded,
-                    title: 'Role',
-                    value: _role == 'student' ? 'Student' : 'Mentor',
+                  const SizedBox(height: 8),
+
+                  // Role Badge
+                  Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 16,
+                      vertical: 8,
+                    ),
+                    decoration: BoxDecoration(
+                      color: _role == 'student'
+                          ? Colors.blue[100]
+                          : Colors.purple[100],
+                      borderRadius: BorderRadius.circular(20),
+                    ),
+                    child: Text(
+                      _role == 'student' ? 'STUDENT' : 'MENTOR',
+                      style: TextStyle(
+                        color: _role == 'student'
+                            ? Colors.blue[900]
+                            : Colors.purple[900],
+                        fontWeight: FontWeight.bold,
+                        fontSize: 14,
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 32),
+
+                  // Profile Information Card
+                  Card(
+                    elevation: 2,
+                    child: Column(
+                      children: [
+                        _buildInfoTile(
+                          icon: Icons.person_rounded,
+                          title: 'Username',
+                          value: _username ?? 'N/A',
+                        ),
+                        const Divider(height: 1),
+                        _buildInfoTile(
+                          icon: Icons.email_rounded,
+                          title: 'Email',
+                          value: _email ?? 'N/A',
+                        ),
+                        const Divider(height: 1),
+                        _buildInfoTile(
+                          icon: Icons.badge_rounded,
+                          title: 'Role',
+                          value: _role == 'student' ? 'Student' : 'Mentor',
+                        ),
+                      ],
+                    ),
+                  ),
+                  const SizedBox(height: 24),
+
+                  // Settings Options
+                  Card(
+                    elevation: 2,
+                    child: Column(
+                      children: [
+                        _buildActionTile(
+                          icon: Icons.edit_rounded,
+                          title: 'Edit Profile',
+                          onTap: () async {
+                            final userProvider = Provider.of<UserProvider>(
+                                context,
+                                listen: false);
+
+                            // Show loading dialog
+                            showDialog(
+                              context: context,
+                              barrierDismissible: false,
+                              builder: (context) => const Center(
+                                child: CircularProgressIndicator(),
+                              ),
+                            );
+
+                            try {
+                              // Always reload user to get latest data
+                              print(
+                                  '🔄 Reloading user data for edit profile...');
+                              await userProvider.loadCurrentUser();
+
+                              // Close loading dialog
+                              if (mounted) Navigator.pop(context);
+
+                              // Check if user is loaded
+                              if (userProvider.user != null) {
+                                print(
+                                    '✅ User loaded: ${userProvider.user!.username}');
+                                final result = await Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (context) => EditProfileScreen(
+                                        user: userProvider.user!),
+                                  ),
+                                );
+                                // Reload user data if profile was updated
+                                if (result == true) {
+                                  _loadUserData();
+                                }
+                              } else {
+                                print('❌ User is still null after loading');
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  const SnackBar(
+                                    content: Text(
+                                        'Failed to load user data. Please try logging in again.'),
+                                    backgroundColor: Colors.red,
+                                  ),
+                                );
+                              }
+                            } catch (e) {
+                              print('❌ Error loading user: $e');
+                              // Close loading dialog
+                              if (mounted) Navigator.pop(context);
+
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                SnackBar(
+                                  content: Text('Error: ${e.toString()}'),
+                                  backgroundColor: Colors.red,
+                                ),
+                              );
+                            }
+                          },
+                        ),
+                        const Divider(height: 1),
+                        _buildActionTile(
+                          icon: Icons.notifications_rounded,
+                          title: 'Notifications',
+                          onTap: () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) =>
+                                    const NotificationsScreen(),
+                              ),
+                            );
+                          },
+                        ),
+                        const Divider(height: 1),
+                        _buildActionTile(
+                          icon: Icons.help_rounded,
+                          title: 'Help & Support',
+                          onTap: () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) => const HelpSupportScreen(),
+                              ),
+                            );
+                          },
+                        ),
+                      ],
+                    ),
+                  ),
+                  const SizedBox(height: 24),
+
+                  // Logout Button
+                  SizedBox(
+                    width: double.infinity,
+                    child: ElevatedButton.icon(
+                      onPressed: _handleLogout,
+                      icon: const Icon(Icons.logout_rounded),
+                      label: const Text('Logout'),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.red,
+                        foregroundColor: Colors.white,
+                        padding: const EdgeInsets.symmetric(vertical: 16),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 16),
+
+                  // App Version
+                  Text(
+                    'Hakbang v1.0.0',
+                    style: TextStyle(
+                      color: Colors.grey[500],
+                      fontSize: 12,
+                    ),
                   ),
                 ],
               ),
-            ),
-            const SizedBox(height: 24),
-
-            // Settings Options
-            Card(
-              elevation: 2,
-              child: Column(
-                children: [
-                  _buildActionTile(
-                    icon: Icons.edit_rounded,
-                    title: 'Edit Profile',
-                    onTap: () async {
-                      final userProvider =
-                          Provider.of<UserProvider>(context, listen: false);
-                      
-                      // Show loading dialog
-                      showDialog(
-                        context: context,
-                        barrierDismissible: false,
-                        builder: (context) => const Center(
-                          child: CircularProgressIndicator(),
-                        ),
-                      );
-                      
-                      try {
-                        // Always reload user to get latest data
-                        print('🔄 Reloading user data for edit profile...');
-                        await userProvider.loadCurrentUser();
-                        
-                        // Close loading dialog
-                        if (mounted) Navigator.pop(context);
-                        
-                        // Check if user is loaded
-                        if (userProvider.user != null) {
-                          print('✅ User loaded: ${userProvider.user!.username}');
-                          final result = await Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (context) =>
-                                  EditProfileScreen(user: userProvider.user!),
-                            ),
-                          );
-                          // Reload user data if profile was updated
-                          if (result == true) {
-                            _loadUserData();
-                          }
-                        } else {
-                          print('❌ User is still null after loading');
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(
-                              content: Text('Failed to load user data. Please try logging in again.'),
-                              backgroundColor: Colors.red,
-                            ),
-                          );
-                        }
-                      } catch (e) {
-                        print('❌ Error loading user: $e');
-                        // Close loading dialog
-                        if (mounted) Navigator.pop(context);
-                        
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(
-                            content: Text('Error: ${e.toString()}'),
-                            backgroundColor: Colors.red,
-                          ),
-                        );
-                      }
-                    },
-                  ),
-                  const Divider(height: 1),
-                  _buildActionTile(
-                    icon: Icons.notifications_rounded,
-                    title: 'Notifications',
-                    onTap: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => const NotificationsScreen(),
-                        ),
-                      );
-                    },
-                  ),
-                  const Divider(height: 1),
-                  _buildActionTile(
-                    icon: Icons.help_rounded,
-                    title: 'Help & Support',
-                    onTap: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => const HelpSupportScreen(),
-                        ),
-                      );
-                    },
-                  ),
-                ],
-              ),
-            ),
-            const SizedBox(height: 24),
-
-            // Logout Button
-            SizedBox(
-              width: double.infinity,
-              child: ElevatedButton.icon(
-                onPressed: _handleLogout,
-                icon: const Icon(Icons.logout_rounded),
-                label: const Text('Logout'),
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.red,
-                  foregroundColor: Colors.white,
-                  padding: const EdgeInsets.symmetric(vertical: 16),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                ),
-              ),
-            ),
-            const SizedBox(height: 16),
-
-            // App Version
-            Text(
-              'Hakbang v1.0.0',
-              style: TextStyle(
-                color: Colors.grey[500],
-                fontSize: 12,
-              ),
-            ),
-          ],
-        ),
             ),
           ),
         ],

@@ -32,7 +32,8 @@ class _CareerDetailScreenState extends State<CareerDetailScreen> {
     });
 
     try {
-      print('🎯 CareerDetailScreen: Loading modules for career ID: "${widget.career.id}"');
+      print(
+          '🎯 CareerDetailScreen: Loading modules for career ID: "${widget.career.id}"');
       print('🎯 Career title: "${widget.career.title}"');
       final modules = await ApiService.getModules(careerId: widget.career.id);
       if (mounted) {
@@ -79,18 +80,18 @@ class _CareerDetailScreenState extends State<CareerDetailScreen> {
           ),
           Expanded(
             child: SingleChildScrollView(
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            // Career Header Section
-            _buildCareerHeader(),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  // Career Header Section
+                  _buildCareerHeader(),
 
-            const SizedBox(height: 8),
+                  const SizedBox(height: 8),
 
-            // Learning Roadmap Section
-            _buildLearningRoadmap(),
-          ],
-        ),
+                  // Learning Roadmap Section
+                  _buildLearningRoadmap(),
+                ],
+              ),
             ),
           ),
         ],

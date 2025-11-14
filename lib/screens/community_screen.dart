@@ -141,7 +141,8 @@ class _CommunityScreenState extends State<CommunityScreen> {
                   contentController.text.trim().isEmpty) {
                 ScaffoldMessenger.of(context).showSnackBar(
                   SnackBar(
-                    content: Text('Please fill in both title and content', style: GoogleFonts.poppins()),
+                    content: Text('Please fill in both title and content',
+                        style: GoogleFonts.poppins()),
                     backgroundColor: Colors.orange,
                   ),
                 );
@@ -176,7 +177,8 @@ class _CommunityScreenState extends State<CommunityScreen> {
 
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Post created successfully!', style: GoogleFonts.poppins()),
+            content: Text('Post created successfully!',
+                style: GoogleFonts.poppins()),
             backgroundColor: Colors.green,
           ),
         );
@@ -189,7 +191,8 @@ class _CommunityScreenState extends State<CommunityScreen> {
 
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Failed to create post: $e', style: GoogleFonts.poppins()),
+            content:
+                Text('Failed to create post: $e', style: GoogleFonts.poppins()),
             backgroundColor: Colors.red,
           ),
         );
@@ -213,7 +216,8 @@ class _CommunityScreenState extends State<CommunityScreen> {
           // TODO: Navigate to post detail screen
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
-              content: Text('Post details coming soon!', style: GoogleFonts.poppins()),
+              content: Text('Post details coming soon!',
+                  style: GoogleFonts.poppins()),
               duration: const Duration(seconds: 1),
             ),
           );
@@ -391,7 +395,8 @@ class _CommunityScreenState extends State<CommunityScreen> {
                   onPressed: () {
                     ScaffoldMessenger.of(context).showSnackBar(
                       SnackBar(
-                        content: Text('Search coming soon!', style: GoogleFonts.poppins()),
+                        content: Text('Search coming soon!',
+                            style: GoogleFonts.poppins()),
                         duration: const Duration(seconds: 1),
                       ),
                     );
@@ -426,7 +431,8 @@ class _CommunityScreenState extends State<CommunityScreen> {
                             ElevatedButton.icon(
                               onPressed: _loadPosts,
                               icon: const Icon(Icons.refresh),
-                              label: Text('Retry', style: GoogleFonts.poppins()),
+                              label:
+                                  Text('Retry', style: GoogleFonts.poppins()),
                               style: ElevatedButton.styleFrom(
                                 backgroundColor: Colors.blue,
                                 foregroundColor: Colors.white,
