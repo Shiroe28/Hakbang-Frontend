@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
 import '../models/career_model.dart';
 import '../services/api_service.dart';
 import 'career_detail_screen.dart';
@@ -48,11 +49,36 @@ class _CareersScreenState extends State<CareersScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('IT Careers'),
-        centerTitle: true,
+      backgroundColor: Colors.white,
+      body: Column(
+        children: [
+          // Header (no rounded corners for careers)
+          Container(
+            width: double.infinity,
+            decoration: const BoxDecoration(
+              color: Color(0xFF2c6894),
+            ),
+            padding: const EdgeInsets.fromLTRB(20, 50, 20, 20),
+            child: Text(
+              'HAKBANG',
+              textAlign: TextAlign.center,
+              style: GoogleFonts.poppins(
+                color: Colors.white,
+                fontSize: 20,
+                fontWeight: FontWeight.bold,
+                letterSpacing: 2,
+                shadows: [
+                  Shadow(
+                    color: Colors.white.withOpacity(0.5),
+                    blurRadius: 8,
+                  ),
+                ],
+              ),
+            ),
+          ),
+          Expanded(child: _buildBody()),
+        ],
       ),
-      body: _buildBody(),
     );
   }
 

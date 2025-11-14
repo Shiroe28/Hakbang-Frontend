@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
 import '../models/post_model.dart';
 import '../services/api_service.dart';
 import '../config/network_config.dart';
@@ -31,12 +32,12 @@ class _CommunityScreenState extends State<CommunityScreen> {
       print('🔄 CommunityScreen: Loading posts...');
       final postsData = await ApiService.getCommunityPosts();
       print('📦 CommunityScreen: Received ${postsData.length} posts');
-      
+
       final posts = postsData.map((json) {
         print('📄 Post data: ${json['_id']} - ${json['title']}');
         return Post.fromJson(json);
       }).toList();
-      
+
       setState(() {
         _posts = posts;
         _isLoading = false;
@@ -45,9 +46,10 @@ class _CommunityScreenState extends State<CommunityScreen> {
     } catch (e) {
       print('❌ CommunityScreen: Error loading posts: $e');
       setState(() {
-        _errorMessage = e.toString().contains('HTTP') || e.toString().contains('Failed')
-            ? 'Network error. Please check your connection and try again.'
-            : 'Failed to load posts. Please try again later.';
+        _errorMessage =
+            e.toString().contains('HTTP') || e.toString().contains('Failed')
+                ? 'Network error. Please check your connection and try again.'
+                : 'Failed to load posts. Please try again later.';
         _isLoading = false;
       });
     }
@@ -94,27 +96,33 @@ class _CommunityScreenState extends State<CommunityScreen> {
     final result = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('Create Post'),
+        title: Text('Create Post', style: GoogleFonts.poppins()),
         content: SingleChildScrollView(
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
               TextField(
                 controller: titleController,
-                decoration: const InputDecoration(
+                style: GoogleFonts.poppins(),
+                decoration: InputDecoration(
                   labelText: 'Title',
+                  labelStyle: GoogleFonts.poppins(),
                   hintText: 'Enter post title',
-                  border: OutlineInputBorder(),
+                  hintStyle: GoogleFonts.poppins(),
+                  border: const OutlineInputBorder(),
                 ),
                 maxLength: 100,
               ),
               const SizedBox(height: 16),
               TextField(
                 controller: contentController,
-                decoration: const InputDecoration(
+                style: GoogleFonts.poppins(),
+                decoration: InputDecoration(
                   labelText: 'Content',
+                  labelStyle: GoogleFonts.poppins(),
                   hintText: 'What\'s on your mind?',
-                  border: OutlineInputBorder(),
+                  hintStyle: GoogleFonts.poppins(),
+                  border: const OutlineInputBorder(),
                 ),
                 maxLines: 5,
                 maxLength: 500,
@@ -125,15 +133,15 @@ class _CommunityScreenState extends State<CommunityScreen> {
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context, false),
-            child: const Text('Cancel'),
+            child: Text('Cancel', style: GoogleFonts.poppins()),
           ),
           ElevatedButton(
             onPressed: () {
               if (titleController.text.trim().isEmpty ||
                   contentController.text.trim().isEmpty) {
                 ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(
-                    content: Text('Please fill in both title and content'),
+                  SnackBar(
+                    content: Text('Please fill in both title and content', style: GoogleFonts.poppins()),
                     backgroundColor: Colors.orange,
                   ),
                 );
@@ -141,7 +149,7 @@ class _CommunityScreenState extends State<CommunityScreen> {
               }
               Navigator.pop(context, true);
             },
-            child: const Text('Post'),
+            child: Text('Post', style: GoogleFonts.poppins()),
           ),
         ],
       ),
@@ -167,8 +175,8 @@ class _CommunityScreenState extends State<CommunityScreen> {
         Navigator.pop(context); // Close loading dialog
 
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Post created successfully!'),
+          SnackBar(
+            content: Text('Post created successfully!', style: GoogleFonts.poppins()),
             backgroundColor: Colors.green,
           ),
         );
@@ -181,7 +189,7 @@ class _CommunityScreenState extends State<CommunityScreen> {
 
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Failed to create post: $e'),
+            content: Text('Failed to create post: $e', style: GoogleFonts.poppins()),
             backgroundColor: Colors.red,
           ),
         );
@@ -204,9 +212,9 @@ class _CommunityScreenState extends State<CommunityScreen> {
         onTap: () {
           // TODO: Navigate to post detail screen
           ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
-              content: Text('Post details coming soon!'),
-              duration: Duration(seconds: 1),
+            SnackBar(
+              content: Text('Post details coming soon!', style: GoogleFonts.poppins()),
+              duration: const Duration(seconds: 1),
             ),
           );
         },
@@ -221,13 +229,16 @@ class _CommunityScreenState extends State<CommunityScreen> {
                   CircleAvatar(
                     radius: 20,
                     backgroundColor: Colors.blue.withValues(alpha: 0.2),
-                    backgroundImage: post.profilePicture != null && post.profilePicture!.isNotEmpty
-                        ? NetworkImage('${NetworkConfig.baseUrlWithoutApi}${post.profilePicture}')
+                    backgroundImage: post.profilePicture != null &&
+                            post.profilePicture!.isNotEmpty
+                        ? NetworkImage(
+                            '${NetworkConfig.baseUrlWithoutApi}${post.profilePicture}')
                         : null,
-                    child: post.profilePicture == null || post.profilePicture!.isEmpty
+                    child: post.profilePicture == null ||
+                            post.profilePicture!.isEmpty
                         ? Text(
                             post.authorName[0].toUpperCase(),
-                            style: const TextStyle(
+                            style: GoogleFonts.poppins(
                               color: Colors.blue,
                               fontWeight: FontWeight.bold,
                             ),
@@ -243,7 +254,7 @@ class _CommunityScreenState extends State<CommunityScreen> {
                           children: [
                             Text(
                               post.authorName,
-                              style: const TextStyle(
+                              style: GoogleFonts.poppins(
                                 fontWeight: FontWeight.bold,
                                 fontSize: 16,
                               ),
@@ -261,7 +272,7 @@ class _CommunityScreenState extends State<CommunityScreen> {
                                 ),
                                 child: Text(
                                   post.authorRole!.toUpperCase(),
-                                  style: const TextStyle(
+                                  style: GoogleFonts.poppins(
                                     color: Colors.white,
                                     fontSize: 10,
                                     fontWeight: FontWeight.bold,
@@ -274,7 +285,7 @@ class _CommunityScreenState extends State<CommunityScreen> {
                         const SizedBox(height: 4),
                         Text(
                           _formatDate(post.createdAt),
-                          style: TextStyle(
+                          style: GoogleFonts.poppins(
                             color: Colors.grey[600],
                             fontSize: 12,
                           ),
@@ -288,7 +299,7 @@ class _CommunityScreenState extends State<CommunityScreen> {
               // Post title
               Text(
                 post.title,
-                style: const TextStyle(
+                style: GoogleFonts.poppins(
                   fontSize: 18,
                   fontWeight: FontWeight.bold,
                 ),
@@ -299,7 +310,7 @@ class _CommunityScreenState extends State<CommunityScreen> {
                 post.content,
                 maxLines: 3,
                 overflow: TextOverflow.ellipsis,
-                style: TextStyle(
+                style: GoogleFonts.poppins(
                   color: Colors.grey[800],
                   fontSize: 14,
                   height: 1.4,
@@ -317,7 +328,7 @@ class _CommunityScreenState extends State<CommunityScreen> {
                   const SizedBox(width: 4),
                   Text(
                     '${post.likes}',
-                    style: TextStyle(color: Colors.grey[600]),
+                    style: GoogleFonts.poppins(color: Colors.grey[600]),
                   ),
                   const SizedBox(width: 16),
                   Icon(
@@ -328,7 +339,7 @@ class _CommunityScreenState extends State<CommunityScreen> {
                   const SizedBox(width: 4),
                   Text(
                     '${post.comments}',
-                    style: TextStyle(color: Colors.grey[600]),
+                    style: GoogleFonts.poppins(color: Colors.grey[600]),
                   ),
                 ],
               ),
@@ -342,101 +353,134 @@ class _CommunityScreenState extends State<CommunityScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Community Forum'),
-        backgroundColor: Colors.blue,
-        foregroundColor: Colors.white,
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.search),
-            onPressed: () {
-              ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(
-                  content: Text('Search coming soon!'),
-                  duration: Duration(seconds: 1),
-                ),
-              );
-            },
-          ),
-        ],
-      ),
-      body: _isLoading
-          ? const Center(child: CircularProgressIndicator())
-          : _errorMessage != null
-              ? Center(
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Icon(
-                        Icons.error_outline,
-                        size: 64,
-                        color: Colors.grey[400],
-                      ),
-                      const SizedBox(height: 16),
-                      Text(
-                        _errorMessage!,
-                        textAlign: TextAlign.center,
-                        style: TextStyle(
-                          color: Colors.grey[600],
-                          fontSize: 16,
-                        ),
-                      ),
-                      const SizedBox(height: 16),
-                      ElevatedButton.icon(
-                        onPressed: _loadPosts,
-                        icon: const Icon(Icons.refresh),
-                        label: const Text('Retry'),
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: Colors.blue,
-                          foregroundColor: Colors.white,
-                        ),
+      backgroundColor: Colors.white,
+      body: Column(
+        children: [
+          // Header (matches main screen)
+          Container(
+            width: double.infinity,
+            decoration: const BoxDecoration(
+              color: Color(0xFF2c6894),
+              borderRadius: BorderRadius.only(
+                bottomLeft: Radius.circular(30),
+                bottomRight: Radius.circular(30),
+              ),
+            ),
+            padding: const EdgeInsets.fromLTRB(20, 50, 20, 20),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Text(
+                  'COMMUNITY FORUM',
+                  style: GoogleFonts.poppins(
+                    color: Colors.white,
+                    fontSize: 20,
+                    fontWeight: FontWeight.bold,
+                    letterSpacing: 2,
+                    shadows: [
+                      Shadow(
+                        color: Colors.white.withOpacity(0.5),
+                        blurRadius: 8,
                       ),
                     ],
                   ),
-                )
-              : _posts.isEmpty
-                  ? Center(
-                      child: Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          Icon(
-                            Icons.forum_outlined,
-                            size: 64,
-                            color: Colors.grey[400],
-                          ),
-                          const SizedBox(height: 16),
-                          Text(
-                            'No posts yet',
-                            style: TextStyle(
-                              color: Colors.grey[600],
-                              fontSize: 18,
-                              fontWeight: FontWeight.bold,
+                ),
+                const Spacer(),
+                IconButton(
+                  icon: const Icon(Icons.search, color: Colors.white),
+                  onPressed: () {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(
+                        content: Text('Search coming soon!', style: GoogleFonts.poppins()),
+                        duration: const Duration(seconds: 1),
+                      ),
+                    );
+                  },
+                ),
+              ],
+            ),
+          ),
+          Expanded(
+            child: _isLoading
+                ? const Center(child: CircularProgressIndicator())
+                : _errorMessage != null
+                    ? Center(
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Icon(
+                              Icons.error_outline,
+                              size: 64,
+                              color: Colors.grey[400],
+                            ),
+                            const SizedBox(height: 16),
+                            Text(
+                              _errorMessage!,
+                              textAlign: TextAlign.center,
+                              style: GoogleFonts.poppins(
+                                color: Colors.grey[600],
+                                fontSize: 16,
+                              ),
+                            ),
+                            const SizedBox(height: 16),
+                            ElevatedButton.icon(
+                              onPressed: _loadPosts,
+                              icon: const Icon(Icons.refresh),
+                              label: Text('Retry', style: GoogleFonts.poppins()),
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: Colors.blue,
+                                foregroundColor: Colors.white,
+                              ),
+                            ),
+                          ],
+                        ),
+                      )
+                    : _posts.isEmpty
+                        ? Center(
+                            child: Column(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                Icon(
+                                  Icons.forum_outlined,
+                                  size: 64,
+                                  color: Colors.grey[400],
+                                ),
+                                const SizedBox(height: 16),
+                                Text(
+                                  'No posts yet',
+                                  style: GoogleFonts.poppins(
+                                    color: Colors.grey[600],
+                                    fontSize: 18,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+                                const SizedBox(height: 8),
+                                Text(
+                                  'Be the first to start a discussion!',
+                                  style: GoogleFonts.poppins(
+                                    color: Colors.grey[600],
+                                    fontSize: 14,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          )
+                        : RefreshIndicator(
+                            onRefresh: _loadPosts,
+                            child: ListView.builder(
+                              itemCount: _posts.length,
+                              padding: const EdgeInsets.symmetric(vertical: 8),
+                              itemBuilder: (context, index) {
+                                return _buildPostCard(_posts[index]);
+                              },
                             ),
                           ),
-                          const SizedBox(height: 8),
-                          Text(
-                            'Be the first to start a discussion!',
-                            style: TextStyle(
-                              color: Colors.grey[600],
-                              fontSize: 14,
-                            ),
-                          ),
-                        ],
-                      ),
-                    )
-                  : RefreshIndicator(
-                      onRefresh: _loadPosts,
-                      child: ListView.builder(
-                        itemCount: _posts.length,
-                        padding: const EdgeInsets.symmetric(vertical: 8),
-                        itemBuilder: (context, index) {
-                          return _buildPostCard(_posts[index]);
-                        },
-                      ),
-                    ),
+          ),
+        ],
+      ),
       floatingActionButton: FloatingActionButton(
         onPressed: () => _showCreatePostDialog(),
-        backgroundColor: Colors.blue,
+        backgroundColor: const Color(0xFF2c6894),
         child: const Icon(Icons.add, color: Colors.white),
       ),
     );

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
 import '../models/career_model.dart';
 import '../models/module_model.dart';
 import '../services/api_service.dart';
@@ -55,11 +56,29 @@ class _CareerDetailScreenState extends State<CareerDetailScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: Text(widget.career.title),
-        centerTitle: true,
-      ),
-      body: SingleChildScrollView(
+      backgroundColor: Colors.white,
+      body: Column(
+        children: [
+          // Header (no rounded corners for careers)
+          Container(
+            width: double.infinity,
+            decoration: const BoxDecoration(
+              color: Color(0xFF2c6894),
+            ),
+            padding: const EdgeInsets.fromLTRB(20, 50, 20, 20),
+            child: Text(
+              'HAKBANG',
+              textAlign: TextAlign.center,
+              style: GoogleFonts.poppins(
+                color: Colors.white,
+                fontSize: 20,
+                fontWeight: FontWeight.bold,
+                letterSpacing: 2,
+              ),
+            ),
+          ),
+          Expanded(
+            child: SingleChildScrollView(
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -72,6 +91,9 @@ class _CareerDetailScreenState extends State<CareerDetailScreen> {
             _buildLearningRoadmap(),
           ],
         ),
+            ),
+          ),
+        ],
       ),
     );
   }
@@ -111,7 +133,7 @@ class _CareerDetailScreenState extends State<CareerDetailScreen> {
           // Title
           Text(
             widget.career.title,
-            style: const TextStyle(
+            style: GoogleFonts.poppins(
               color: Colors.white,
               fontSize: 28,
               fontWeight: FontWeight.bold,
@@ -122,7 +144,7 @@ class _CareerDetailScreenState extends State<CareerDetailScreen> {
           // Description
           Text(
             widget.career.description,
-            style: const TextStyle(
+            style: GoogleFonts.poppins(
               color: Colors.white,
               fontSize: 16,
               height: 1.5,
