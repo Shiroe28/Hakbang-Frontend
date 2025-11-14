@@ -39,12 +39,12 @@ class _MainScreenState extends State<MainScreen> {
     // Load from UserProvider (which loads from API)
     final userProvider = Provider.of<UserProvider>(context, listen: false);
     await userProvider.loadCurrentUser();
-    
+
     // Get username from provider or storage
     String? username;
     if (userProvider.user != null) {
       username = userProvider.user!.username;
-      
+
       // Save to storage for quick access next time
       await StorageService.saveAuthData(
         token: await StorageService.getToken() ?? '',
@@ -55,7 +55,7 @@ class _MainScreenState extends State<MainScreen> {
       // Fallback to stored username if API fails
       username = await StorageService.getUsername();
     }
-    
+
     if (mounted) {
       setState(() {
         _username = username;
@@ -164,7 +164,8 @@ class HomeTabScreen extends StatelessWidget {
                 Text(
                   'HAKBANG',
                   style: GoogleFonts.poppins(
-                    color: const Color(0xFF5A9CC5), // Lighter blue - lifted color
+                    color:
+                        const Color(0xFF5A9CC5), // Lighter blue - lifted color
                     fontSize: 28,
                     fontWeight: FontWeight.bold,
                     letterSpacing: 3,
@@ -212,7 +213,8 @@ class HomeTabScreen extends StatelessWidget {
                         children: [
                           CircleAvatar(
                             radius: 25,
-                            backgroundColor: const Color(0xFF2c6894).withOpacity(0.1),
+                            backgroundColor:
+                                const Color(0xFF2c6894).withOpacity(0.1),
                             child: const Icon(
                               Icons.person,
                               size: 28,
@@ -275,7 +277,8 @@ class HomeTabScreen extends StatelessWidget {
                       context,
                       icon: Icons.explore_rounded,
                       title: 'Explore Careers',
-                      description: 'Discover IT career paths that match your interests',
+                      description:
+                          'Discover IT career paths that match your interests',
                       onTap: () {
                         // Navigate to Careers tab
                         onNavigateToTab?.call(1);
@@ -287,7 +290,8 @@ class HomeTabScreen extends StatelessWidget {
                       context,
                       icon: Icons.school_rounded,
                       title: 'Learning Modules',
-                      description: 'Follow structured learning paths to achieve your goals',
+                      description:
+                          'Follow structured learning paths to achieve your goals',
                       onTap: () {
                         // Navigate to Careers tab (index 1) where modules are shown
                         onNavigateToTab?.call(1);
@@ -299,12 +303,14 @@ class HomeTabScreen extends StatelessWidget {
                       context,
                       icon: Icons.psychology_rounded,
                       title: 'AI Career Reccomendations',
-                      description: 'Take a quiz to get personalized career suggestions',
+                      description:
+                          'Take a quiz to get personalized career suggestions',
                       onTap: () {
                         Navigator.push(
                           context,
                           MaterialPageRoute(
-                            builder: (context) => const RecommendationQuizScreen(),
+                            builder: (context) =>
+                                const RecommendationQuizScreen(),
                           ),
                         );
                       },
@@ -331,7 +337,8 @@ class HomeTabScreen extends StatelessWidget {
                       context,
                       icon: Icons.smart_toy_rounded,
                       title: 'AI Career Mentor',
-                      description: 'Chat with AI for career guidance and advice',
+                      description:
+                          'Chat with AI for career guidance and advice',
                       onTap: () {
                         Navigator.push(
                           context,
@@ -379,7 +386,8 @@ class HomeTabScreen extends StatelessWidget {
                       context,
                       icon: Icons.help_rounded,
                       title: 'Help & Support',
-                      description: 'Get help and find answers to your questions',
+                      description:
+                          'Get help and find answers to your questions',
                       onTap: () {
                         Navigator.push(
                           context,
