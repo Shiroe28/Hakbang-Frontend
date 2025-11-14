@@ -5,11 +5,13 @@ import '../models/assessment_model.dart';
 class ModuleAssessmentScreen extends StatefulWidget {
   final String moduleId;
   final String moduleName;
+  final String careerId;
 
   const ModuleAssessmentScreen({
     super.key,
     required this.moduleId,
     required this.moduleName,
+    required this.careerId,
   });
 
   @override
@@ -84,6 +86,7 @@ class _ModuleAssessmentScreenState extends State<ModuleAssessmentScreen> {
       final results = await ApiService.submitAssessment(
         assessmentId: _assessment!.id,
         answers: answers,
+        careerId: widget.careerId,
       );
 
       print('✅ Assessment submitted: $results');

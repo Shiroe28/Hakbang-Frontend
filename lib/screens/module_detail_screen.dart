@@ -230,6 +230,7 @@ class ModuleDetailScreen extends StatelessWidget {
                             builder: (context) => ModuleAssessmentScreen(
                               moduleId: module.id,
                               moduleName: module.title,
+                              careerId: module.careerId,
                             ),
                           ),
                         );

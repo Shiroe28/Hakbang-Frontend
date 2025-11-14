@@ -301,16 +301,19 @@ class ApiService {
   static Future<Map<String, dynamic>> submitAssessment({
     required String assessmentId,
     required List<int> answers,
+    required String careerId,
   }) async {
     try {
       print('📤 Submitting assessment: $assessmentId');
       print('   Answers: $answers');
+      print('   Career ID: $careerId');
       
       final response = await http.post(
         Uri.parse('$baseUrl/learning/assessments/$assessmentId/submit'),
         headers: await _getHeaders(needsAuth: true),
         body: jsonEncode({
           'answers': answers,
+          'careerId': careerId,
         }),
       );
 
