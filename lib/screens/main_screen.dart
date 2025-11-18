@@ -332,7 +332,7 @@ class HomeTabScreen extends StatelessWidget {
                               title: 'Explore Careers',
                               description: 'Discover IT paths',
                               gradient: const LinearGradient(
-                                colors: [Color(0xFF6A5AE0), Color(0xFF9D8DF1)],
+                                colors: [Color(0xFF0FA3E2), Color(0xFF2DB3E8)],
                                 begin: Alignment.topLeft,
                                 end: Alignment.bottomRight,
                               ),
@@ -347,7 +347,7 @@ class HomeTabScreen extends StatelessWidget {
                               title: 'AI Career Quiz',
                               description: 'Get personalized suggestions',
                               gradient: const LinearGradient(
-                                colors: [Color(0xFFFF6B9D), Color(0xFFC06C84)],
+                                colors: [Color(0xFF4597B8), Color(0xFF5BA7C3)],
                                 begin: Alignment.topLeft,
                                 end: Alignment.bottomRight,
                               ),
@@ -368,7 +368,7 @@ class HomeTabScreen extends StatelessWidget {
                               title: 'Achievements',
                               description: 'Track progress & badges',
                               gradient: const LinearGradient(
-                                colors: [Color(0xFFFFA500), Color(0xFFFFD700)],
+                                colors: [Color(0xFF6AAFCA), Color(0xFF7EBDD4)],
                                 begin: Alignment.topLeft,
                                 end: Alignment.bottomRight,
                               ),
@@ -388,7 +388,7 @@ class HomeTabScreen extends StatelessWidget {
                               title: 'AI Mentor',
                               description: 'Chat for career guidance',
                               gradient: const LinearGradient(
-                                colors: [Color(0xFF00BFA5), Color(0xFF00D9A5)],
+                                colors: [Color(0xFF8FC7DC), Color(0xFFA0D1E4)],
                                 begin: Alignment.topLeft,
                                 end: Alignment.bottomRight,
                               ),
@@ -409,7 +409,7 @@ class HomeTabScreen extends StatelessWidget {
                               title: 'Resume Builder',
                               description: 'AI-powered feedback',
                               gradient: const LinearGradient(
-                                colors: [Color(0xFF42A5F5), Color(0xFF478DE0)],
+                                colors: [Color(0xFFB4DFED), Color(0xFFC2E5F1)],
                                 begin: Alignment.topLeft,
                                 end: Alignment.bottomRight,
                               ),
@@ -430,7 +430,7 @@ class HomeTabScreen extends StatelessWidget {
                               title: 'Help & Support',
                               description: 'Find answers & help',
                               gradient: const LinearGradient(
-                                colors: [Color(0xFFEF5350), Color(0xFFE57373)],
+                                colors: [Color(0xFF2C6894), Color(0xFF3D7BA5)],
                                 begin: Alignment.topLeft,
                                 end: Alignment.bottomRight,
                               ),

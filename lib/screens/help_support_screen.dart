@@ -16,7 +16,13 @@ class HelpSupportScreen extends StatelessWidget {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('Frequently Asked Questions'),
+        title: Text(
+          'Frequently Asked Questions',
+          style: GoogleFonts.poppins(
+            fontWeight: FontWeight.bold,
+            color: const Color(0xFF2c6894),
+          ),
+        ),
         content: SingleChildScrollView(
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -24,7 +30,7 @@ class HelpSupportScreen extends StatelessWidget {
             children: [
               _buildFAQItem(
                 'How do I get started?',
-                'Take the career assessment quiz on the homepage, then browse career paths and start learning!',
+                'Take the career quiz, explore career paths, and start learning!',
               ),
               _buildFAQItem(
                 'Are the courses free?',
@@ -32,11 +38,11 @@ class HelpSupportScreen extends StatelessWidget {
               ),
               _buildFAQItem(
                 'How do I track my progress?',
-                'Your progress is automatically saved as you complete modules and quizzes.',
+                'Your progress is automatically saved as you complete modules.',
               ),
               _buildFAQItem(
                 'Can I change my career path?',
-                'Absolutely! You can explore multiple career paths at any time.',
+                'Absolutely! You can explore multiple career paths anytime.',
               ),
             ],
           ),
@@ -44,7 +50,13 @@ class HelpSupportScreen extends StatelessWidget {
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
-            child: const Text('Close'),
+            child: Text(
+              'Close',
+              style: GoogleFonts.poppins(
+                color: const Color(0xFF2c6894),
+                fontWeight: FontWeight.w600,
+              ),
+            ),
           ),
         ],
       ),
@@ -59,15 +71,19 @@ class HelpSupportScreen extends StatelessWidget {
         children: [
           Text(
             question,
-            style: const TextStyle(
+            style: GoogleFonts.poppins(
               fontWeight: FontWeight.bold,
               fontSize: 14,
+              color: Colors.black87,
             ),
           ),
           const SizedBox(height: 4),
           Text(
             answer,
-            style: const TextStyle(fontSize: 13),
+            style: GoogleFonts.poppins(
+              fontSize: 13,
+              color: Colors.grey[600],
+            ),
           ),
         ],
       ),
@@ -200,11 +216,12 @@ class HelpSupportScreen extends StatelessWidget {
                 const SizedBox(height: 24),
 
                 // Resources
-                const Text(
+                Text(
                   'Resources',
-                  style: TextStyle(
+                  style: GoogleFonts.poppins(
                     fontSize: 18,
                     fontWeight: FontWeight.bold,
+                    color: Colors.black87,
                   ),
                 ),
                 const SizedBox(height: 12),
@@ -213,19 +230,22 @@ class HelpSupportScreen extends StatelessWidget {
                   context,
                   icon: Icons.menu_book,
                   title: 'User Guide',
-                  description: 'Learn how to use all features of Hakbang',
+                  description: 'Learn how to use Hakbang',
                   onTap: () => _showFAQs(context),
                 ),
                 _buildResourceCard(
                   context,
                   icon: Icons.video_library,
                   title: 'Video Tutorials',
-                  description: 'Watch step-by-step video guides',
+                  description: 'Watch helpful video guides',
                   onTap: () {
                     ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(
-                        content: Text('Video tutorials coming soon!'),
-                        duration: Duration(seconds: 2),
+                      SnackBar(
+                        content: Text(
+                          'Video tutorials coming soon!',
+                          style: GoogleFonts.poppins(),
+                        ),
+                        duration: const Duration(seconds: 2),
                       ),
                     );
                   },
@@ -234,11 +254,12 @@ class HelpSupportScreen extends StatelessWidget {
                 const SizedBox(height: 24),
 
                 // Contact Info
-                const Text(
+                Text(
                   'Contact Information',
-                  style: TextStyle(
+                  style: GoogleFonts.poppins(
                     fontSize: 18,
                     fontWeight: FontWeight.bold,
+                    color: Colors.black87,
                   ),
                 ),
                 const SizedBox(height: 12),
@@ -246,8 +267,11 @@ class HelpSupportScreen extends StatelessWidget {
                 Container(
                   padding: const EdgeInsets.all(16),
                   decoration: BoxDecoration(
-                    color: Colors.grey[100],
+                    color: const Color(0xFF2c6894).withOpacity(0.1),
                     borderRadius: BorderRadius.circular(12),
+                    border: Border.all(
+                      color: const Color(0xFF2c6894).withOpacity(0.3),
+                    ),
                   ),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
@@ -257,7 +281,7 @@ class HelpSupportScreen extends StatelessWidget {
                         'Email',
                         'Hakbang@gmail.com',
                       ),
-                      const Divider(),
+                      Divider(color: Colors.grey[300]),
                       _buildContactRow(
                         Icons.phone,
                         'Phone',
@@ -274,16 +298,25 @@ class HelpSupportScreen extends StatelessWidget {
                   child: Column(
                     children: [
                       Text(
-                        'Hakbang v1.0.0',
-                        style: TextStyle(
-                          color: Colors.grey[600],
-                          fontSize: 12,
+                        'Hakbang - Career Path Finder',
+                        style: GoogleFonts.poppins(
+                          fontSize: 14,
+                          fontWeight: FontWeight.w600,
+                          color: Colors.black87,
                         ),
                       ),
                       const SizedBox(height: 4),
                       Text(
+                        'Version 1.0.0',
+                        style: GoogleFonts.poppins(
+                          color: Colors.grey[600],
+                          fontSize: 12,
+                        ),
+                      ),
+                      const SizedBox(height: 8),
+                      Text(
                         '© 2025 Hakbang. All rights reserved.',
-                        style: TextStyle(
+                        style: GoogleFonts.poppins(
                           color: Colors.grey[600],
                           fontSize: 12,
                         ),
@@ -349,11 +382,12 @@ class HelpSupportScreen extends StatelessWidget {
     required String description,
     required VoidCallback onTap,
   }) {
-    return Card(
+    return Container(
       margin: const EdgeInsets.only(bottom: 12),
-      elevation: 1,
-      shape: RoundedRectangleBorder(
+      decoration: BoxDecoration(
+        color: Colors.white,
         borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: Colors.grey[300]!),
       ),
       child: InkWell(
         borderRadius: BorderRadius.circular(12),
@@ -362,7 +396,14 @@ class HelpSupportScreen extends StatelessWidget {
           padding: const EdgeInsets.all(16),
           child: Row(
             children: [
-              Icon(icon, color: Colors.blue, size: 32),
+              Container(
+                padding: const EdgeInsets.all(12),
+                decoration: BoxDecoration(
+                  color: const Color(0xFF2c6894).withOpacity(0.1),
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: Icon(icon, color: const Color(0xFF2c6894), size: 24),
+              ),
               const SizedBox(width: 16),
               Expanded(
                 child: Column(
@@ -370,15 +411,16 @@ class HelpSupportScreen extends StatelessWidget {
                   children: [
                     Text(
                       title,
-                      style: const TextStyle(
-                        fontWeight: FontWeight.bold,
+                      style: GoogleFonts.poppins(
+                        fontWeight: FontWeight.w600,
                         fontSize: 15,
+                        color: Colors.black87,
                       ),
                     ),
                     const SizedBox(height: 4),
                     Text(
                       description,
-                      style: TextStyle(
+                      style: GoogleFonts.poppins(
                         color: Colors.grey[600],
                         fontSize: 13,
                       ),
@@ -386,7 +428,11 @@ class HelpSupportScreen extends StatelessWidget {
                   ],
                 ),
               ),
-              Icon(Icons.chevron_right, color: Colors.grey[400]),
+              const Icon(
+                Icons.arrow_forward_ios,
+                size: 16,
+                color: Color(0xFF2c6894),
+              ),
             ],
           ),
         ),
@@ -395,34 +441,32 @@ class HelpSupportScreen extends StatelessWidget {
   }
 
   Widget _buildContactRow(IconData icon, String label, String value) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 8),
-      child: Row(
-        children: [
-          Icon(icon, size: 20, color: Colors.blue),
-          const SizedBox(width: 12),
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                label,
-                style: TextStyle(
-                  fontSize: 12,
-                  color: Colors.grey[600],
-                ),
+    return Row(
+      children: [
+        Icon(icon, color: const Color(0xFF2c6894), size: 20),
+        const SizedBox(width: 12),
+        Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              label,
+              style: GoogleFonts.poppins(
+                fontSize: 12,
+                color: Colors.grey[600],
+                fontWeight: FontWeight.w500,
               ),
-              const SizedBox(height: 2),
-              Text(
-                value,
-                style: const TextStyle(
-                  fontSize: 14,
-                  fontWeight: FontWeight.w500,
-                ),
+            ),
+            Text(
+              value,
+              style: GoogleFonts.poppins(
+                fontSize: 14,
+                color: Colors.black87,
+                fontWeight: FontWeight.w600,
               ),
-            ],
-          ),
-        ],
-      ),
+            ),
+          ],
+        ),
+      ],
     );
   }
 }

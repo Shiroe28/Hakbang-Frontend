@@ -148,7 +148,6 @@ class _RecommendationQuizScreenState extends State<RecommendationQuizScreen> {
   @override
   Widget build(BuildContext context) {
     final currentQuestion = _questions[_currentQuestionIndex];
-    final progress = (_currentQuestionIndex + 1) / _questions.length;
     final selectedAnswer = _answers[_currentQuestionIndex];
 
     return Scaffold(
@@ -193,14 +192,52 @@ class _RecommendationQuizScreenState extends State<RecommendationQuizScreen> {
             ),
           ),
 
-          // Progress Indicator
-          LinearProgressIndicator(
-            value: progress,
-            backgroundColor: Colors.grey[200],
-            valueColor: const AlwaysStoppedAnimation<Color>(
-              Color(0xFF2c6894),
+          // Progress Section
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+            decoration: BoxDecoration(
+              color: Colors.white,
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withOpacity(0.05),
+                  blurRadius: 4,
+                  offset: const Offset(0, 2),
+                ),
+              ],
             ),
-            minHeight: 6,
+            child: Column(
+              children: [
+                // Progress dots
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: List.generate(
+                    _questions.length,
+                    (index) => Container(
+                      margin: const EdgeInsets.symmetric(horizontal: 4),
+                      width: index <= _currentQuestionIndex ? 32 : 24,
+                      height: 8,
+                      decoration: BoxDecoration(
+                        color: index < _currentQuestionIndex
+                            ? const Color(0xFF2c6894)
+                            : index == _currentQuestionIndex
+                                ? const Color(0xFF2c6894)
+                                : Colors.grey[300],
+                        borderRadius: BorderRadius.circular(4),
+                      ),
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 8),
+                Text(
+                  'Question ${_currentQuestionIndex + 1} of ${_questions.length}',
+                  style: GoogleFonts.poppins(
+                    fontSize: 13,
+                    color: Colors.grey[600],
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
+              ],
+            ),
           ),
 
           Expanded(
@@ -209,17 +246,6 @@ class _RecommendationQuizScreenState extends State<RecommendationQuizScreen> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  // Question Counter
-                  Text(
-                    'Question ${_currentQuestionIndex + 1} of ${_questions.length}',
-                    style: GoogleFonts.poppins(
-                      fontSize: 14,
-                      color: Colors.grey[600],
-                      fontWeight: FontWeight.w500,
-                    ),
-                  ),
-                  const SizedBox(height: 16),
-
                   // Question Text
                   Text(
                     currentQuestion.question,
@@ -230,7 +256,7 @@ class _RecommendationQuizScreenState extends State<RecommendationQuizScreen> {
                       color: Colors.black87,
                     ),
                   ),
-                  const SizedBox(height: 32),
+                  const SizedBox(height: 24),
 
                   // Answer Options
                   ...List.generate(
