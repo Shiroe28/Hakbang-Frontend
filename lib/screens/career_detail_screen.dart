@@ -67,15 +67,32 @@ class _CareerDetailScreenState extends State<CareerDetailScreen> {
               color: Color(0xFF2c6894),
             ),
             padding: const EdgeInsets.fromLTRB(20, 50, 20, 20),
-            child: Text(
-              'HAKBANG',
-              textAlign: TextAlign.center,
-              style: GoogleFonts.poppins(
-                color: Colors.white,
-                fontSize: 20,
-                fontWeight: FontWeight.bold,
-                letterSpacing: 2,
-              ),
+            child: Row(
+              children: [
+                IconButton(
+                  onPressed: () {
+                    Navigator.pop(context);
+                  },
+                  icon: const Icon(
+                    Icons.arrow_back,
+                    color: Colors.white,
+                    size: 24,
+                  ),
+                ),
+                Expanded(
+                  child: Text(
+                    'HAKBANG',
+                    textAlign: TextAlign.center,
+                    style: GoogleFonts.poppins(
+                      color: Colors.white,
+                      fontSize: 20,
+                      fontWeight: FontWeight.bold,
+                      letterSpacing: 2,
+                    ),
+                  ),
+                ),
+                const SizedBox(width: 48), // Balance the back button
+              ],
             ),
           ),
           Expanded(

@@ -17,6 +17,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
   final _passwordController = TextEditingController();
   final _confirmPasswordController = TextEditingController();
   String _selectedRole = 'student';
+  bool _isStudent = true; // Default to student
   bool _isLoading = false;
   bool _obscurePassword = true;
   bool _obscureConfirmPassword = true;
@@ -321,56 +322,105 @@ class _RegisterScreenState extends State<RegisterScreen> {
                 ),
                 const SizedBox(height: 16),
 
-                // Role Selection Label
-                const Padding(
-                  padding: EdgeInsets.only(left: 8, bottom: 8),
-                  child: Text(
-                    'I am a',
-                    style: TextStyle(
-                      fontSize: 14,
-                      color: Colors.black87,
+                // Student Role Checkbox Option
+                InkWell(
+                  onTap: () {
+                    setState(() {
+                      _isStudent = !_isStudent;
+                    });
+                  },
+                  borderRadius: BorderRadius.circular(12),
+                  child: Container(
+                    padding: const EdgeInsets.all(16),
+                    decoration: BoxDecoration(
+                      color: _isStudent
+                          ? const Color(0xFF2c6894).withOpacity(0.1)
+                          : Colors.grey[100],
+                      borderRadius: BorderRadius.circular(12),
+                      border: Border.all(
+                        color: _isStudent
+                            ? const Color(0xFF2c6894)
+                            : Colors.grey[300]!,
+                        width: _isStudent ? 2 : 1,
+                      ),
                     ),
-                  ),
-                ),
+                    child: Row(
+                      children: [
+                        // Checkbox
+                        Container(
+                          width: 28,
+                          height: 28,
+                          decoration: BoxDecoration(
+                            color: _isStudent
+                                ? const Color(0xFF2c6894)
+                                : Colors.transparent,
+                            borderRadius: BorderRadius.circular(6),
+                            border: Border.all(
+                              color: _isStudent
+                                  ? const Color(0xFF2c6894)
+                                  : Colors.grey[400]!,
+                              width: 2,
+                            ),
+                          ),
+                          child: _isStudent
+                              ? const Icon(
+                                  Icons.check,
+                                  size: 18,
+                                  color: Colors.white,
+                                )
+                              : null,
+                        ),
+                        const SizedBox(width: 16),
 
-                // Role Selection Dropdown
-                Container(
-                  decoration: BoxDecoration(
-                    color: Colors.grey[100],
-                    borderRadius: BorderRadius.circular(30),
-                  ),
-                  padding: const EdgeInsets.symmetric(horizontal: 20),
-                  child: DropdownButtonFormField<String>(
-                    value: _selectedRole,
-                    style: const TextStyle(
-                      color: Colors.black,
-                      fontSize: 16,
+                        // Icon
+                        Container(
+                          padding: const EdgeInsets.all(8),
+                          decoration: BoxDecoration(
+                            color: _isStudent
+                                ? const Color(0xFF2c6894).withOpacity(0.2)
+                                : Colors.grey[200],
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                          child: Icon(
+                            Icons.school_rounded,
+                            color: _isStudent
+                                ? const Color(0xFF2c6894)
+                                : Colors.grey[600],
+                            size: 24,
+                          ),
+                        ),
+                        const SizedBox(width: 12),
+
+                        // Text
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                'I am a Student',
+                                style: TextStyle(
+                                  color: _isStudent
+                                      ? Colors.black
+                                      : Colors.grey[700],
+                                  fontSize: 16,
+                                  fontWeight: _isStudent
+                                      ? FontWeight.bold
+                                      : FontWeight.w600,
+                                ),
+                              ),
+                              const SizedBox(height: 4),
+                              Text(
+                                'Explore careers and learn new skills',
+                                style: TextStyle(
+                                  color: Colors.grey[600],
+                                  fontSize: 12,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ],
                     ),
-                    decoration: InputDecoration(
-                      prefixIcon: Container(
-                        padding: const EdgeInsets.all(12),
-                        child: const Icon(Icons.badge_outlined, size: 20),
-                      ),
-                      border: InputBorder.none,
-                      contentPadding: const EdgeInsets.symmetric(vertical: 16),
-                    ),
-                    dropdownColor: Colors.white,
-                    icon: const Icon(Icons.arrow_drop_down),
-                    items: const [
-                      DropdownMenuItem(
-                        value: 'student',
-                        child: Text('Student'),
-                      ),
-                      DropdownMenuItem(
-                        value: 'mentor',
-                        child: Text('Mentor'),
-                      ),
-                    ],
-                    onChanged: (value) {
-                      setState(() {
-                        _selectedRole = value!;
-                      });
-                    },
                   ),
                 ),
                 const SizedBox(height: 32),

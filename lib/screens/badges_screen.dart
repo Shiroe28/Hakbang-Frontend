@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
 
 class BadgesScreen extends StatelessWidget {
   const BadgesScreen({super.key});
@@ -6,256 +7,276 @@ class BadgesScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Achievements & Badges'),
-        centerTitle: true,
-        backgroundColor: Colors.blue,
-        foregroundColor: Colors.white,
-      ),
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            // Header section
-            Container(
-              width: double.infinity,
-              padding: const EdgeInsets.all(24),
-              decoration: BoxDecoration(
-                gradient: LinearGradient(
-                  colors: [Colors.blue[700]!, Colors.blue[500]!],
-                ),
-                borderRadius: BorderRadius.circular(16),
+      backgroundColor: Colors.white,
+      body: Column(
+        children: [
+          // Blue Header Section
+          Container(
+            width: double.infinity,
+            decoration: const BoxDecoration(
+              color: Color(0xFF2c6894), // Azure blue
+              borderRadius: BorderRadius.only(
+                bottomLeft: Radius.circular(30),
+                bottomRight: Radius.circular(30),
               ),
-              child: Column(
-                children: [
-                  Icon(
-                    Icons.emoji_events,
-                    size: 64,
-                    color: Colors.white.withValues(alpha: 0.9),
+            ),
+            padding: const EdgeInsets.fromLTRB(20, 50, 20, 25),
+            child: Row(
+              children: [
+                IconButton(
+                  onPressed: () {
+                    Navigator.pop(context);
+                  },
+                  icon: const Icon(
+                    Icons.arrow_back,
+                    color: Colors.white,
+                    size: 24,
                   ),
-                  const SizedBox(height: 16),
-                  const Text(
-                    'Your Achievements',
-                    style: TextStyle(
+                ),
+                const SizedBox(width: 8),
+                Expanded(
+                  child: Text(
+                    'Achievements',
+                    style: GoogleFonts.poppins(
+                      color: Colors.white,
                       fontSize: 24,
                       fontWeight: FontWeight.bold,
-                      color: Colors.white,
                     ),
-                  ),
-                  const SizedBox(height: 8),
-                  Text(
-                    'Earn badges by completing learning milestones',
-                    textAlign: TextAlign.center,
-                    style: TextStyle(
-                      fontSize: 14,
-                      color: Colors.white.withValues(alpha: 0.9),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-            const SizedBox(height: 24),
-
-            // Progress Overview
-            const Text(
-              'Progress Overview',
-              style: TextStyle(
-                fontSize: 18,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-            const SizedBox(height: 12),
-            Row(
-              children: [
-                Expanded(
-                  child: _buildStatCard(
-                    context,
-                    icon: Icons.stars,
-                    title: 'Badges Earned',
-                    value: '0',
-                    color: Colors.amber,
-                  ),
-                ),
-                const SizedBox(width: 12),
-                Expanded(
-                  child: _buildStatCard(
-                    context,
-                    icon: Icons.trending_up,
-                    title: 'Total Points',
-                    value: '0',
-                    color: Colors.green,
                   ),
                 ),
               ],
             ),
-            const SizedBox(height: 24),
+          ),
 
-            // Badges Grid
-            const Text(
-              'Available Badges',
-              style: TextStyle(
-                fontSize: 18,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-            const SizedBox(height: 12),
-
-            // Empty state message
-            Container(
-              padding: const EdgeInsets.all(32),
-              decoration: BoxDecoration(
-                color: Colors.grey[100],
-                borderRadius: BorderRadius.circular(16),
-                border: Border.all(color: Colors.grey[300]!),
-              ),
+          // Content
+          Expanded(
+            child: SingleChildScrollView(
+              padding: const EdgeInsets.all(16),
               child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Icon(
-                    Icons.emoji_events_outlined,
-                    size: 64,
-                    color: Colors.grey[400],
-                  ),
-                  const SizedBox(height: 16),
+                  // Header section
                   Text(
-                    'Start learning to earn your first badge!',
-                    textAlign: TextAlign.center,
-                    style: TextStyle(
-                      fontSize: 18,
+                    'Your Progress',
+                    style: GoogleFonts.poppins(
+                      fontSize: 20,
                       fontWeight: FontWeight.bold,
-                      color: Colors.grey[700],
+                      color: Colors.black87,
                     ),
                   ),
-                  const SizedBox(height: 8),
+                  const SizedBox(height: 4),
                   Text(
-                    'Complete modules and quizzes to unlock achievements',
-                    textAlign: TextAlign.center,
-                    style: TextStyle(
+                    'Track your learning journey and unlock achievements',
+                    style: GoogleFonts.poppins(
                       fontSize: 14,
                       color: Colors.grey[600],
                     ),
                   ),
-                ],
-              ),
-            ),
+                  const SizedBox(height: 16),
 
-            const SizedBox(height: 24),
-
-            // Show all badges as locked
-            GridView.count(
-              crossAxisCount: 3,
-              shrinkWrap: true,
-              physics: const NeverScrollableScrollPhysics(),
-              mainAxisSpacing: 16,
-              crossAxisSpacing: 16,
-              children: [
-                _buildBadgeCard(
-                  icon: Icons.code,
-                  title: 'HTML Novice',
-                  description: 'Complete HTML basics',
-                  isEarned: false,
-                  color: Colors.orange,
-                ),
-                _buildBadgeCard(
-                  icon: Icons.javascript,
-                  title: 'JavaScript Adept',
-                  description: 'Master JavaScript fundamentals',
-                  isEarned: false,
-                  color: Colors.yellow[700]!,
-                ),
-                _buildBadgeCard(
-                  icon: Icons.dataset,
-                  title: 'Database Pro',
-                  description: 'Complete database module',
-                  isEarned: false,
-                  color: Colors.blue,
-                ),
-                _buildBadgeCard(
-                  icon: Icons.api,
-                  title: 'API Master',
-                  description: 'Build RESTful APIs',
-                  isEarned: false,
-                  color: Colors.purple,
-                ),
-                _buildBadgeCard(
-                  icon: Icons.design_services,
-                  title: 'UI Designer',
-                  description: 'Create beautiful interfaces',
-                  isEarned: false,
-                  color: Colors.pink,
-                ),
-                _buildBadgeCard(
-                  icon: Icons.security,
-                  title: 'Security Expert',
-                  description: 'Learn security best practices',
-                  isEarned: false,
-                  color: Colors.red,
-                ),
-                _buildBadgeCard(
-                  icon: Icons.cloud,
-                  title: 'Cloud Wizard',
-                  description: 'Deploy to cloud platforms',
-                  isEarned: false,
-                  color: Colors.cyan,
-                ),
-                _buildBadgeCard(
-                  icon: Icons.speed,
-                  title: 'Performance Guru',
-                  description: 'Optimize application performance',
-                  isEarned: false,
-                  color: Colors.green,
-                ),
-                _buildBadgeCard(
-                  icon: Icons.auto_awesome,
-                  title: 'AI Pioneer',
-                  description: 'Integrate AI features',
-                  isEarned: false,
-                  color: Colors.indigo,
-                ),
-              ],
-            ),
-
-            const SizedBox(height: 24),
-
-            // Milestones - Empty state
-            const Text(
-              'Recent Milestones',
-              style: TextStyle(
-                fontSize: 18,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-            const SizedBox(height: 12),
-
-            Container(
-              padding: const EdgeInsets.all(24),
-              decoration: BoxDecoration(
-                color: Colors.grey[100],
-                borderRadius: BorderRadius.circular(12),
-                border: Border.all(color: Colors.grey[300]!),
-              ),
-              child: Row(
-                children: [
-                  Icon(
-                    Icons.history,
-                    color: Colors.grey[400],
-                    size: 32,
+                  // Progress Overview
+                  const Text(
+                    'Progress Overview',
+                    style: TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold,
+                    ),
                   ),
-                  const SizedBox(width: 16),
-                  Expanded(
-                    child: Text(
-                      'Your learning milestones will appear here as you progress',
-                      style: TextStyle(
-                        color: Colors.grey[600],
-                        fontSize: 14,
+                  const SizedBox(height: 12),
+                  Row(
+                    children: [
+                      Expanded(
+                        child: _buildStatCard(
+                          context,
+                          icon: Icons.stars,
+                          title: 'Badges Earned',
+                          value: '0',
+                          color: Colors.amber,
+                        ),
                       ),
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: _buildStatCard(
+                          context,
+                          icon: Icons.trending_up,
+                          title: 'Total Points',
+                          value: '0',
+                          color: Colors.green,
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 24),
+
+                  // Badges Section Title
+                  Text(
+                    'All Achievements',
+                    style: GoogleFonts.poppins(
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.black87,
+                    ),
+                  ),
+                  const SizedBox(height: 12),
+
+                  // Empty state message
+                  Container(
+                    padding: const EdgeInsets.all(32),
+                    decoration: BoxDecoration(
+                      color: Colors.grey[100],
+                      borderRadius: BorderRadius.circular(16),
+                      border: Border.all(color: Colors.grey[300]!),
+                    ),
+                    child: Column(
+                      children: [
+                        Icon(
+                          Icons.emoji_events_outlined,
+                          size: 64,
+                          color: Colors.grey[400],
+                        ),
+                        const SizedBox(height: 16),
+                        Text(
+                          'Start learning to earn your first badge!',
+                          textAlign: TextAlign.center,
+                          style: TextStyle(
+                            fontSize: 18,
+                            fontWeight: FontWeight.bold,
+                            color: Colors.grey[700],
+                          ),
+                        ),
+                        const SizedBox(height: 8),
+                        Text(
+                          'Complete modules and quizzes to unlock achievements',
+                          textAlign: TextAlign.center,
+                          style: TextStyle(
+                            fontSize: 14,
+                            color: Colors.grey[600],
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+
+                  const SizedBox(height: 24),
+
+                  // Show all badges as locked
+                  GridView.count(
+                    crossAxisCount: 3,
+                    shrinkWrap: true,
+                    physics: const NeverScrollableScrollPhysics(),
+                    mainAxisSpacing: 16,
+                    crossAxisSpacing: 16,
+                    children: [
+                      _buildBadgeCard(
+                        icon: Icons.code,
+                        title: 'HTML Novice',
+                        description: 'Complete HTML basics',
+                        isEarned: false,
+                        color: Colors.orange,
+                      ),
+                      _buildBadgeCard(
+                        icon: Icons.javascript,
+                        title: 'JavaScript Adept',
+                        description: 'Master JavaScript fundamentals',
+                        isEarned: false,
+                        color: Colors.yellow[700]!,
+                      ),
+                      _buildBadgeCard(
+                        icon: Icons.dataset,
+                        title: 'Database Pro',
+                        description: 'Complete database module',
+                        isEarned: false,
+                        color: Colors.blue,
+                      ),
+                      _buildBadgeCard(
+                        icon: Icons.api,
+                        title: 'API Master',
+                        description: 'Build RESTful APIs',
+                        isEarned: false,
+                        color: Colors.purple,
+                      ),
+                      _buildBadgeCard(
+                        icon: Icons.design_services,
+                        title: 'UI Designer',
+                        description: 'Create beautiful interfaces',
+                        isEarned: false,
+                        color: Colors.pink,
+                      ),
+                      _buildBadgeCard(
+                        icon: Icons.security,
+                        title: 'Security Expert',
+                        description: 'Learn security best practices',
+                        isEarned: false,
+                        color: Colors.red,
+                      ),
+                      _buildBadgeCard(
+                        icon: Icons.cloud,
+                        title: 'Cloud Wizard',
+                        description: 'Deploy to cloud platforms',
+                        isEarned: false,
+                        color: Colors.cyan,
+                      ),
+                      _buildBadgeCard(
+                        icon: Icons.speed,
+                        title: 'Performance Guru',
+                        description: 'Optimize application performance',
+                        isEarned: false,
+                        color: Colors.green,
+                      ),
+                      _buildBadgeCard(
+                        icon: Icons.auto_awesome,
+                        title: 'AI Pioneer',
+                        description: 'Integrate AI features',
+                        isEarned: false,
+                        color: Colors.indigo,
+                      ),
+                    ],
+                  ),
+
+                  const SizedBox(height: 24),
+
+                  // Milestones - Empty state
+                  const Text(
+                    'Recent Milestones',
+                    style: TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  const SizedBox(height: 12),
+
+                  Container(
+                    padding: const EdgeInsets.all(24),
+                    decoration: BoxDecoration(
+                      color: Colors.grey[100],
+                      borderRadius: BorderRadius.circular(12),
+                      border: Border.all(color: Colors.grey[300]!),
+                    ),
+                    child: Row(
+                      children: [
+                        Icon(
+                          Icons.emoji_events_outlined,
+                          color: const Color(0xFF2c6894),
+                          size: 32,
+                        ),
+                        const SizedBox(width: 16),
+                        Expanded(
+                          child: Text(
+                            'Your learning milestones will appear here as you progress',
+                            style: GoogleFonts.poppins(
+                              color: Colors.grey[600],
+                              fontSize: 14,
+                            ),
+                          ),
+                        ),
+                      ],
                     ),
                   ),
                 ],
               ),
             ),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }
@@ -280,7 +301,7 @@ class BadgesScreen extends StatelessWidget {
           const SizedBox(height: 8),
           Text(
             value,
-            style: TextStyle(
+            style: GoogleFonts.poppins(
               fontSize: 24,
               fontWeight: FontWeight.bold,
               color: color,
@@ -290,7 +311,7 @@ class BadgesScreen extends StatelessWidget {
           Text(
             title,
             textAlign: TextAlign.center,
-            style: TextStyle(
+            style: GoogleFonts.poppins(
               fontSize: 12,
               color: Colors.grey[700],
             ),

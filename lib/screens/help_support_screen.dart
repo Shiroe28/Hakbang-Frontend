@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 class HelpSupportScreen extends StatelessWidget {
@@ -76,228 +77,224 @@ class HelpSupportScreen extends StatelessWidget {
   void _showLiveChat(BuildContext context) {
     ScaffoldMessenger.of(context).showSnackBar(
       const SnackBar(
-        content: Text('Live chat feature coming soon! Use the AI Mentor in the meantime.'),
+        content: Text(
+            'Live chat feature coming soon! Use the AI Mentor in the meantime.'),
         duration: Duration(seconds: 3),
       ),
     );
   }
 
-  void _sendEmail(BuildContext context) async {
-    final emailUrl = Uri.parse('mailto:support@hakbang.com?subject=Hakbang%20Support%20Request');
-    try {
-      if (await canLaunchUrl(emailUrl)) {
-        await launchUrl(emailUrl);
-      } else {
-        if (context.mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
-              content: Text('Could not open email client'),
-              backgroundColor: Colors.red,
-            ),
-          );
-        }
-      }
-    } catch (e) {
-      if (context.mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Email: support@hakbang.com'),
-            duration: Duration(seconds: 3),
-          ),
-        );
-      }
-    }
-  }
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Help & Support'),
-        backgroundColor: Colors.blue,
-        foregroundColor: Colors.white,
-      ),
-      body: ListView(
-        padding: const EdgeInsets.all(16),
+      backgroundColor: Colors.white,
+      body: Column(
         children: [
-          // Header section
+          // Blue Header Section
           Container(
-            padding: const EdgeInsets.all(24),
-            decoration: BoxDecoration(
-              gradient: LinearGradient(
-                colors: [Colors.blue[700]!, Colors.blue[500]!],
+            width: double.infinity,
+            decoration: const BoxDecoration(
+              color: Color(0xFF2c6894),
+              borderRadius: BorderRadius.only(
+                bottomLeft: Radius.circular(30),
+                bottomRight: Radius.circular(30),
               ),
-              borderRadius: BorderRadius.circular(16),
             ),
-            child: Column(
+            padding: const EdgeInsets.fromLTRB(20, 50, 20, 25),
+            child: Row(
               children: [
-                Icon(
-                  Icons.help_outline,
-                  size: 64,
-                  color: Colors.white.withValues(alpha: 0.9),
-                ),
-                const SizedBox(height: 16),
-                const Text(
-                  'We\'re Here to Help!',
-                  style: TextStyle(
-                    fontSize: 24,
-                    fontWeight: FontWeight.bold,
+                IconButton(
+                  onPressed: () {
+                    Navigator.pop(context);
+                  },
+                  icon: const Icon(
+                    Icons.arrow_back,
                     color: Colors.white,
+                    size: 24,
                   ),
                 ),
-                const SizedBox(height: 8),
-                Text(
-                  'Find answers, get support, and learn more about Hakbang',
-                  textAlign: TextAlign.center,
-                  style: TextStyle(
-                    fontSize: 14,
-                    color: Colors.white.withValues(alpha: 0.9),
-                  ),
-                ),
-              ],
-            ),
-          ),
-          const SizedBox(height: 24),
-
-          // Quick Actions
-          const Text(
-            'Quick Actions',
-            style: TextStyle(
-              fontSize: 18,
-              fontWeight: FontWeight.bold,
-            ),
-          ),
-          const SizedBox(height: 12),
-
-          _buildActionCard(
-            context,
-            icon: Icons.search,
-            title: 'Search FAQs',
-            subtitle: 'Find answers to common questions',
-            onTap: () => _showFAQs(context),
-          ),
-          _buildActionCard(
-            context,
-            icon: Icons.chat_bubble_outline,
-            title: 'Live Chat',
-            subtitle: 'Chat with our support team',
-            onTap: () => _showLiveChat(context),
-          ),
-          _buildActionCard(
-            context,
-            icon: Icons.email_outlined,
-            title: 'Email Support',
-            subtitle: 'Hakbang@gmail.com',
-            onTap: () async {
-              try {
-                await _launchURL('mailto:Hakbang@gmail.com');
-              } catch (e) {
-                if (context.mounted) {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(
-                      content: Text('Could not open email client'),
+                const SizedBox(width: 8),
+                Expanded(
+                  child: Text(
+                    'Help & Support',
+                    style: GoogleFonts.poppins(
+                      color: Colors.white,
+                      fontSize: 24,
+                      fontWeight: FontWeight.bold,
                     ),
-                  );
-                }
-              }
-            },
-          ),
-
-          const SizedBox(height: 24),
-
-          // Resources
-          const Text(
-            'Resources',
-            style: TextStyle(
-              fontSize: 18,
-              fontWeight: FontWeight.bold,
-            ),
-          ),
-          const SizedBox(height: 12),
-
-          _buildResourceCard(
-            context,
-            icon: Icons.menu_book,
-            title: 'User Guide',
-            description: 'Learn how to use all features of Hakbang',
-            onTap: () => _showFAQs(context),
-          ),
-          _buildResourceCard(
-            context,
-            icon: Icons.video_library,
-            title: 'Video Tutorials',
-            description: 'Watch step-by-step video guides',
-            onTap: () {
-              ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(
-                  content: Text('Video tutorials coming soon!'),
-                  duration: Duration(seconds: 2),
-                ),
-              );
-            },
-          ),
-
-          const SizedBox(height: 24),
-
-          // Contact Info
-          const Text(
-            'Contact Information',
-            style: TextStyle(
-              fontSize: 18,
-              fontWeight: FontWeight.bold,
-            ),
-          ),
-          const SizedBox(height: 12),
-
-          Container(
-            padding: const EdgeInsets.all(16),
-            decoration: BoxDecoration(
-              color: Colors.grey[100],
-              borderRadius: BorderRadius.circular(12),
-            ),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                _buildContactRow(
-                  Icons.email,
-                  'Email',
-                  'Hakbang@gmail.com',
-                ),
-                const Divider(),
-                _buildContactRow(
-                  Icons.phone,
-                  'Phone',
-                  '+63 9602022402',
+                  ),
                 ),
               ],
             ),
           ),
 
-          const SizedBox(height: 24),
-
-          // App Info
-          Center(
-            child: Column(
+          // Body
+          Expanded(
+            child: ListView(
+              padding: const EdgeInsets.all(16),
               children: [
+                // Header section
                 Text(
-                  'Hakbang v1.0.0',
-                  style: TextStyle(
-                    color: Colors.grey[600],
-                    fontSize: 12,
+                  'We\'re Here to Help!',
+                  style: GoogleFonts.poppins(
+                    fontSize: 22,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.black87,
                   ),
                 ),
                 const SizedBox(height: 4),
                 Text(
-                  '© 2025 Hakbang. All rights reserved.',
-                  style: TextStyle(
+                  'Find answers, get support, and learn more about Hakbang',
+                  style: GoogleFonts.poppins(
+                    fontSize: 14,
                     color: Colors.grey[600],
-                    fontSize: 12,
                   ),
                 ),
+                const SizedBox(height: 24),
+
+                // Quick Actions
+                Text(
+                  'Quick Actions',
+                  style: GoogleFonts.poppins(
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.black87,
+                  ),
+                ),
+                const SizedBox(height: 12),
+
+                _buildActionCard(
+                  context,
+                  icon: Icons.search,
+                  title: 'Search FAQs',
+                  subtitle: 'Find answers to common questions',
+                  onTap: () => _showFAQs(context),
+                ),
+                _buildActionCard(
+                  context,
+                  icon: Icons.chat_bubble_outline,
+                  title: 'Live Chat',
+                  subtitle: 'Chat with our support team',
+                  onTap: () => _showLiveChat(context),
+                ),
+                _buildActionCard(
+                  context,
+                  icon: Icons.email_outlined,
+                  title: 'Email Support',
+                  subtitle: 'Hakbang@gmail.com',
+                  onTap: () async {
+                    try {
+                      await _launchURL('mailto:Hakbang@gmail.com');
+                    } catch (e) {
+                      if (context.mounted) {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(
+                            content: Text('Could not open email client'),
+                          ),
+                        );
+                      }
+                    }
+                  },
+                ),
+
+                const SizedBox(height: 24),
+
+                // Resources
+                const Text(
+                  'Resources',
+                  style: TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                const SizedBox(height: 12),
+
+                _buildResourceCard(
+                  context,
+                  icon: Icons.menu_book,
+                  title: 'User Guide',
+                  description: 'Learn how to use all features of Hakbang',
+                  onTap: () => _showFAQs(context),
+                ),
+                _buildResourceCard(
+                  context,
+                  icon: Icons.video_library,
+                  title: 'Video Tutorials',
+                  description: 'Watch step-by-step video guides',
+                  onTap: () {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(
+                        content: Text('Video tutorials coming soon!'),
+                        duration: Duration(seconds: 2),
+                      ),
+                    );
+                  },
+                ),
+
+                const SizedBox(height: 24),
+
+                // Contact Info
+                const Text(
+                  'Contact Information',
+                  style: TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                const SizedBox(height: 12),
+
+                Container(
+                  padding: const EdgeInsets.all(16),
+                  decoration: BoxDecoration(
+                    color: Colors.grey[100],
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      _buildContactRow(
+                        Icons.email,
+                        'Email',
+                        'Hakbang@gmail.com',
+                      ),
+                      const Divider(),
+                      _buildContactRow(
+                        Icons.phone,
+                        'Phone',
+                        '+63 9602022402',
+                      ),
+                    ],
+                  ),
+                ),
+
+                const SizedBox(height: 24),
+
+                // App Info
+                Center(
+                  child: Column(
+                    children: [
+                      Text(
+                        'Hakbang v1.0.0',
+                        style: TextStyle(
+                          color: Colors.grey[600],
+                          fontSize: 12,
+                        ),
+                      ),
+                      const SizedBox(height: 4),
+                      Text(
+                        '© 2025 Hakbang. All rights reserved.',
+                        style: TextStyle(
+                          color: Colors.grey[600],
+                          fontSize: 12,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                const SizedBox(height: 16),
               ],
             ),
           ),
-          const SizedBox(height: 16),
         ],
       ),
     );

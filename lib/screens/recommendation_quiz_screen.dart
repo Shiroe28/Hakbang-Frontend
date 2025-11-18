@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
 import '../services/api_service.dart';
 import '../models/career_model.dart';
 import 'recommendation_results_screen.dart';
@@ -151,20 +152,55 @@ class _RecommendationQuizScreenState extends State<RecommendationQuizScreen> {
     final selectedAnswer = _answers[_currentQuestionIndex];
 
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Career Recommendation Quiz'),
-        centerTitle: true,
-      ),
+      backgroundColor: Colors.white,
       body: Column(
         children: [
+          // Blue Header Section
+          Container(
+            width: double.infinity,
+            decoration: const BoxDecoration(
+              color: Color(0xFF2c6894), // Azure blue
+              borderRadius: BorderRadius.only(
+                bottomLeft: Radius.circular(30),
+                bottomRight: Radius.circular(30),
+              ),
+            ),
+            padding: const EdgeInsets.fromLTRB(20, 50, 20, 25),
+            child: Row(
+              children: [
+                IconButton(
+                  onPressed: () {
+                    Navigator.pop(context);
+                  },
+                  icon: const Icon(
+                    Icons.arrow_back,
+                    color: Colors.white,
+                    size: 24,
+                  ),
+                ),
+                const SizedBox(width: 8),
+                Expanded(
+                  child: Text(
+                    'Career Quiz',
+                    style: GoogleFonts.poppins(
+                      color: Colors.white,
+                      fontSize: 24,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+
           // Progress Indicator
           LinearProgressIndicator(
             value: progress,
             backgroundColor: Colors.grey[200],
-            valueColor: AlwaysStoppedAnimation<Color>(
-              Theme.of(context).primaryColor,
+            valueColor: const AlwaysStoppedAnimation<Color>(
+              Color(0xFF2c6894),
             ),
-            minHeight: 8,
+            minHeight: 6,
           ),
 
           Expanded(
@@ -176,7 +212,7 @@ class _RecommendationQuizScreenState extends State<RecommendationQuizScreen> {
                   // Question Counter
                   Text(
                     'Question ${_currentQuestionIndex + 1} of ${_questions.length}',
-                    style: TextStyle(
+                    style: GoogleFonts.poppins(
                       fontSize: 14,
                       color: Colors.grey[600],
                       fontWeight: FontWeight.w500,
@@ -187,10 +223,11 @@ class _RecommendationQuizScreenState extends State<RecommendationQuizScreen> {
                   // Question Text
                   Text(
                     currentQuestion.question,
-                    style: const TextStyle(
-                      fontSize: 24,
+                    style: GoogleFonts.poppins(
+                      fontSize: 22,
                       fontWeight: FontWeight.bold,
                       height: 1.3,
+                      color: Colors.black87,
                     ),
                   ),
                   const SizedBox(height: 32),
@@ -230,12 +267,17 @@ class _RecommendationQuizScreenState extends State<RecommendationQuizScreen> {
                     child: OutlinedButton.icon(
                       onPressed: _isSubmitting ? null : _previousQuestion,
                       icon: const Icon(Icons.arrow_back),
-                      label: const Text('Previous'),
+                      label: Text(
+                        'Previous',
+                        style: GoogleFonts.poppins(),
+                      ),
                       style: OutlinedButton.styleFrom(
                         padding: const EdgeInsets.symmetric(vertical: 16),
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(12),
                         ),
+                        side: const BorderSide(color: Color(0xFF2c6894)),
+                        foregroundColor: const Color(0xFF2c6894),
                       ),
                     ),
                   ),
@@ -267,12 +309,14 @@ class _RecommendationQuizScreenState extends State<RecommendationQuizScreen> {
                       _currentQuestionIndex == _questions.length - 1
                           ? 'Get Recommendations'
                           : 'Next',
-                      style: const TextStyle(
-                        fontSize: 16,
-                        fontWeight: FontWeight.bold,
+                      style: GoogleFonts.poppins(
+                        fontSize: 15,
+                        fontWeight: FontWeight.w600,
                       ),
                     ),
                     style: ElevatedButton.styleFrom(
+                      backgroundColor: const Color(0xFF2c6894),
+                      foregroundColor: Colors.white,
                       padding: const EdgeInsets.symmetric(vertical: 16),
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(12),
@@ -298,13 +342,11 @@ class _RecommendationQuizScreenState extends State<RecommendationQuizScreen> {
           padding: const EdgeInsets.all(20),
           decoration: BoxDecoration(
             color: isSelected
-                ? Theme.of(context).primaryColor.withValues(alpha: 0.1)
+                ? const Color(0xFF2c6894).withOpacity(0.1)
                 : Colors.grey[50],
             borderRadius: BorderRadius.circular(16),
             border: Border.all(
-              color: isSelected
-                  ? Theme.of(context).primaryColor
-                  : Colors.grey[300]!,
+              color: isSelected ? const Color(0xFF2c6894) : Colors.grey[300]!,
               width: isSelected ? 2 : 1,
             ),
           ),
@@ -318,13 +360,12 @@ class _RecommendationQuizScreenState extends State<RecommendationQuizScreen> {
                   shape: BoxShape.circle,
                   border: Border.all(
                     color: isSelected
-                        ? Theme.of(context).primaryColor
+                        ? const Color(0xFF2c6894)
                         : Colors.grey[400]!,
                     width: 2,
                   ),
-                  color: isSelected
-                      ? Theme.of(context).primaryColor
-                      : Colors.transparent,
+                  color:
+                      isSelected ? const Color(0xFF2c6894) : Colors.transparent,
                 ),
                 child: isSelected
                     ? const Icon(
@@ -340,10 +381,12 @@ class _RecommendationQuizScreenState extends State<RecommendationQuizScreen> {
               Expanded(
                 child: Text(
                   option,
-                  style: TextStyle(
-                    fontSize: 16,
-                    fontWeight: isSelected ? FontWeight.w600 : FontWeight.normal,
-                    color: isSelected ? Theme.of(context).primaryColor : Colors.black87,
+                  style: GoogleFonts.poppins(
+                    fontSize: 15,
+                    fontWeight:
+                        isSelected ? FontWeight.w600 : FontWeight.normal,
+                    color:
+                        isSelected ? const Color(0xFF2c6894) : Colors.black87,
                   ),
                 ),
               ),

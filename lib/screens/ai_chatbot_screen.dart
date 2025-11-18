@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
 import '../services/api_service.dart';
 
 class AIChatbotScreen extends StatefulWidget {
@@ -84,9 +85,9 @@ class _AIChatbotScreenState extends State<AIChatbotScreen> {
       _scrollToBottom();
     } catch (e) {
       print('❌ Chat error: $e');
-      
+
       if (!mounted) return;
-      
+
       setState(() {
         _messages.add(ChatMessage(
           text: "Sorry, I'm having trouble connecting right now. "
@@ -116,19 +117,53 @@ class _AIChatbotScreenState extends State<AIChatbotScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Row(
-          children: [
-            Icon(Icons.smart_toy, size: 24),
-            SizedBox(width: 8),
-            Text('AI Career Mentor'),
-          ],
-        ),
-        backgroundColor: Colors.blue,
-        foregroundColor: Colors.white,
-      ),
+      backgroundColor: Colors.white,
       body: Column(
         children: [
+          // Blue Header Section
+          Container(
+            width: double.infinity,
+            decoration: const BoxDecoration(
+              color: Color(0xFF2c6894),
+              borderRadius: BorderRadius.only(
+                bottomLeft: Radius.circular(30),
+                bottomRight: Radius.circular(30),
+              ),
+            ),
+            padding: const EdgeInsets.fromLTRB(20, 50, 20, 25),
+            child: Row(
+              children: [
+                IconButton(
+                  onPressed: () {
+                    Navigator.pop(context);
+                  },
+                  icon: const Icon(
+                    Icons.arrow_back,
+                    color: Colors.white,
+                    size: 24,
+                  ),
+                ),
+                const SizedBox(width: 8),
+                const Icon(
+                  Icons.smart_toy,
+                  color: Colors.white,
+                  size: 28,
+                ),
+                const SizedBox(width: 8),
+                Expanded(
+                  child: Text(
+                    'AI Career Mentor',
+                    style: GoogleFonts.poppins(
+                      color: Colors.white,
+                      fontSize: 24,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+
           // Chat messages
           Expanded(
             child: ListView.builder(
@@ -144,8 +179,10 @@ class _AIChatbotScreenState extends State<AIChatbotScreen> {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         CircleAvatar(
-                          backgroundColor: Colors.blue.withValues(alpha: 0.2),
-                          child: const Icon(Icons.smart_toy, color: Colors.blue),
+                          backgroundColor:
+                              const Color(0xFF2c6894).withOpacity(0.2),
+                          child: const Icon(Icons.smart_toy,
+                              color: Color(0xFF2c6894)),
                         ),
                         const SizedBox(width: 12),
                         Container(
@@ -154,7 +191,7 @@ class _AIChatbotScreenState extends State<AIChatbotScreen> {
                             vertical: 12,
                           ),
                           decoration: BoxDecoration(
-                            color: Colors.grey[200],
+                            color: Colors.grey[100],
                             borderRadius: BorderRadius.circular(16),
                           ),
                           child: Row(
@@ -199,6 +236,9 @@ class _AIChatbotScreenState extends State<AIChatbotScreen> {
                       controller: _messageController,
                       decoration: InputDecoration(
                         hintText: 'Ask me anything about IT careers...',
+                        hintStyle: GoogleFonts.poppins(
+                          color: Colors.grey[400],
+                        ),
                         border: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(24),
                           borderSide: BorderSide(color: Colors.grey[300]!),
@@ -209,20 +249,24 @@ class _AIChatbotScreenState extends State<AIChatbotScreen> {
                         ),
                         focusedBorder: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(24),
-                          borderSide: const BorderSide(color: Colors.blue),
+                          borderSide: const BorderSide(
+                              color: Color(0xFF2c6894), width: 2),
                         ),
+                        filled: true,
+                        fillColor: Colors.grey[50],
                         contentPadding: const EdgeInsets.symmetric(
                           horizontal: 20,
                           vertical: 12,
                         ),
                       ),
+                      style: GoogleFonts.poppins(fontSize: 15),
                       textInputAction: TextInputAction.send,
                       onSubmitted: (_) => _sendMessage(),
                     ),
                   ),
                   const SizedBox(width: 12),
                   CircleAvatar(
-                    backgroundColor: Colors.blue,
+                    backgroundColor: const Color(0xFF2c6894),
                     child: IconButton(
                       icon: const Icon(Icons.send, color: Colors.white),
                       onPressed: _sendMessage,
@@ -245,7 +289,7 @@ class _AIChatbotScreenState extends State<AIChatbotScreen> {
         final delay = index * 0.2;
         final animValue = (value - delay).clamp(0.0, 1.0);
         final opacity = (animValue * 2).clamp(0.0, 1.0);
-        
+
         return Opacity(
           opacity: opacity,
           child: Container(
@@ -285,9 +329,7 @@ class _AIChatbotScreenState extends State<AIChatbotScreen> {
                 Container(
                   padding: const EdgeInsets.all(16),
                   decoration: BoxDecoration(
-                    color: message.isUser
-                        ? Colors.blue
-                        : Colors.grey[200],
+                    color: message.isUser ? Colors.blue : Colors.grey[200],
                     borderRadius: BorderRadius.only(
                       topLeft: const Radius.circular(16),
                       topRight: const Radius.circular(16),

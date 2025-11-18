@@ -69,6 +69,58 @@ class _MainScreenState extends State<MainScreen> {
     });
   }
 
+  Widget _buildNavItem(int index, IconData icon, String label) {
+    final isSelected = _currentIndex == index;
+    return GestureDetector(
+      onTap: () {
+        setState(() {
+          _currentIndex = index;
+        });
+      },
+      child: Container(
+        padding: EdgeInsets.symmetric(
+          horizontal: isSelected ? 20.0 : 12.0,
+          vertical: isSelected ? 12.0 : 10.0,
+        ),
+        decoration: BoxDecoration(
+          color: isSelected ? const Color(0xFF2c6894) : Colors.transparent,
+          borderRadius: BorderRadius.circular(20),
+          boxShadow: isSelected
+              ? [
+                  const BoxShadow(
+                    color: Color(0x4D2c6894), // 30% opacity
+                    blurRadius: 12,
+                    spreadRadius: 0,
+                    offset: Offset(0, 4),
+                  ),
+                ]
+              : [],
+        ),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(
+              icon,
+              color: isSelected ? Colors.white : const Color(0xFF757575),
+              size: isSelected ? 26.0 : 24.0,
+            ),
+            if (isSelected) ...[
+              const SizedBox(width: 8),
+              Text(
+                label,
+                style: GoogleFonts.poppins(
+                  color: Colors.white,
+                  fontWeight: FontWeight.w600,
+                  fontSize: 14,
+                ),
+              ),
+            ],
+          ],
+        ),
+      ),
+    );
+  }
+
   // List of screens for each tab
   List<Widget> get _screens => [
         HomeTabScreen(
@@ -90,62 +142,27 @@ class _MainScreenState extends State<MainScreen> {
       ),
       bottomNavigationBar: Container(
         decoration: BoxDecoration(
-          color: Colors.grey[300],
-          borderRadius: const BorderRadius.only(
-            topLeft: Radius.circular(30),
-            topRight: Radius.circular(30),
-          ),
+          color: Colors.white,
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withOpacity(0.1),
-              blurRadius: 10,
-              offset: const Offset(0, -2),
+              color: Colors.black.withOpacity(0.08),
+              blurRadius: 20,
+              offset: const Offset(0, -5),
             ),
           ],
         ),
-        child: ClipRRect(
-          borderRadius: const BorderRadius.only(
-            topLeft: Radius.circular(30),
-            topRight: Radius.circular(30),
-          ),
-          child: BottomNavigationBar(
-            currentIndex: _currentIndex,
-            onTap: (index) {
-              setState(() {
-                _currentIndex = index;
-              });
-            },
-            type: BottomNavigationBarType.fixed,
-            backgroundColor: Colors.grey[300],
-            selectedItemColor: const Color(0xFF2c6894),
-            unselectedItemColor: Colors.grey[800],
-            selectedLabelStyle: GoogleFonts.poppins(
-              fontWeight: FontWeight.w600,
-              fontSize: 13,
+        child: SafeArea(
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceAround,
+              children: [
+                _buildNavItem(0, Icons.home_rounded, 'Home'),
+                _buildNavItem(1, Icons.work_rounded, 'Careers'),
+                _buildNavItem(2, Icons.forum_rounded, 'Community'),
+                _buildNavItem(3, Icons.person_rounded, 'Profile'),
+              ],
             ),
-            unselectedLabelStyle: GoogleFonts.poppins(
-              fontSize: 12,
-            ),
-            elevation: 0,
-            iconSize: 28,
-            items: const [
-              BottomNavigationBarItem(
-                icon: Icon(Icons.home_rounded),
-                label: 'Home',
-              ),
-              BottomNavigationBarItem(
-                icon: Icon(Icons.work_rounded),
-                label: 'Careers',
-              ),
-              BottomNavigationBarItem(
-                icon: Icon(Icons.forum_rounded),
-                label: 'Community',
-              ),
-              BottomNavigationBarItem(
-                icon: Icon(Icons.person_rounded),
-                label: 'Profile',
-              ),
-            ],
           ),
         ),
       ),
@@ -172,7 +189,7 @@ class HomeTabScreen extends StatelessWidget {
       backgroundColor: Colors.white,
       body: Column(
         children: [
-          // Blue Header Section with HAKBANG logo
+          // Blue Header Section with HAKBANG logo and Notification Icon
           Container(
             width: double.infinity,
             decoration: const BoxDecoration(
@@ -183,34 +200,36 @@ class HomeTabScreen extends StatelessWidget {
               ),
             ),
             padding: const EdgeInsets.fromLTRB(20, 50, 20, 25),
-            child: Column(
+            child: Stack(
+              alignment: Alignment.center,
               children: [
-                // HAKBANG Text with Glow Effect and Lifted Appearance
+                // HAKBANG Text centered
                 Text(
                   'HAKBANG',
                   style: GoogleFonts.poppins(
-                    color:
-                        const Color(0xFF5A9CC5), // Lighter blue - lifted color
+                    color: Colors.white,
                     fontSize: 28,
                     fontWeight: FontWeight.bold,
                     letterSpacing: 3,
-                    shadows: [
-                      Shadow(
-                        color: const Color(0xFF5A9CC5).withOpacity(0.8),
-                        blurRadius: 15,
-                        offset: const Offset(0, 2),
-                      ),
-                      Shadow(
-                        color: Colors.white.withOpacity(0.5),
-                        blurRadius: 25,
-                        offset: const Offset(0, 1),
-                      ),
-                      Shadow(
-                        color: Colors.black.withOpacity(0.2),
-                        blurRadius: 8,
-                        offset: const Offset(0, 4),
-                      ),
-                    ],
+                  ),
+                ),
+                // Notification Icon positioned on the right
+                Positioned(
+                  right: 0,
+                  child: IconButton(
+                    onPressed: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => const NotificationsScreen(),
+                        ),
+                      );
+                    },
+                    icon: const Icon(
+                      Icons.notifications_rounded,
+                      color: Colors.white,
+                      size: 28,
+                    ),
                   ),
                 ),
               ],
@@ -291,134 +310,142 @@ class HomeTabScreen extends StatelessWidget {
                       'Your Journey',
                       style: GoogleFonts.poppins(
                         fontWeight: FontWeight.bold,
-                        fontSize: 20,
-                        color: Colors.black,
+                        fontSize: 22,
+                        color: Colors.black87,
                       ),
                     ),
                     const SizedBox(height: 16),
 
-                    // Menu Items Cards - 8 total (scrollable)
-                    _buildMenuCard(
-                      context,
-                      icon: Icons.explore_rounded,
-                      title: 'Explore Careers',
-                      description:
-                          'Discover IT career paths that match your interests',
-                      onTap: () {
-                        // Navigate to Careers tab
-                        onNavigateToTab?.call(1);
-                      },
-                    ),
-                    const SizedBox(height: 12),
+                    // 2-Column Grid Layout
+                    LayoutBuilder(
+                      builder: (context, constraints) {
+                        // Calculate card width based on screen size
+                        double cardWidth = (constraints.maxWidth - 12) / 2;
 
-                    _buildMenuCard(
-                      context,
-                      icon: Icons.school_rounded,
-                      title: 'Learning Modules',
-                      description:
-                          'Follow structured learning paths to achieve your goals',
-                      onTap: () {
-                        // Navigate to Careers tab (index 1) where modules are shown
-                        onNavigateToTab?.call(1);
-                      },
-                    ),
-                    const SizedBox(height: 12),
-
-                    _buildMenuCard(
-                      context,
-                      icon: Icons.psychology_rounded,
-                      title: 'AI Career Reccomendations',
-                      description:
-                          'Take a quiz to get personalized career suggestions',
-                      onTap: () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (context) =>
-                                const RecommendationQuizScreen(),
-                          ),
-                        );
-                      },
-                    ),
-                    const SizedBox(height: 12),
-
-                    _buildMenuCard(
-                      context,
-                      icon: Icons.emoji_events_rounded,
-                      title: 'Achievements & Badges',
-                      description: 'Track your progress and earn badges',
-                      onTap: () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (context) => const BadgesScreen(),
-                          ),
-                        );
-                      },
-                    ),
-                    const SizedBox(height: 12),
-
-                    _buildMenuCard(
-                      context,
-                      icon: Icons.smart_toy_rounded,
-                      title: 'AI Career Mentor',
-                      description:
-                          'Chat with AI for career guidance and advice',
-                      onTap: () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (context) => const AIChatbotScreen(),
-                          ),
-                        );
-                      },
-                    ),
-                    const SizedBox(height: 12),
-
-                    _buildMenuCard(
-                      context,
-                      icon: Icons.description_rounded,
-                      title: 'AI Resume Builder',
-                      description: 'Get AI-powered feedback on your resume',
-                      onTap: () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (context) => const ResumeBuilderScreen(),
-                          ),
-                        );
-                      },
-                    ),
-                    const SizedBox(height: 12),
-
-                    _buildMenuCard(
-                      context,
-                      icon: Icons.notifications_rounded,
-                      title: 'Notifications',
-                      description: 'Stay updated with latest news and updates',
-                      onTap: () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (context) => const NotificationsScreen(),
-                          ),
-                        );
-                      },
-                    ),
-                    const SizedBox(height: 12),
-
-                    _buildMenuCard(
-                      context,
-                      icon: Icons.help_rounded,
-                      title: 'Help & Support',
-                      description:
-                          'Get help and find answers to your questions',
-                      onTap: () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (context) => const HelpSupportScreen(),
-                          ),
+                        return Wrap(
+                          spacing: 12,
+                          runSpacing: 12,
+                          children: [
+                            _buildGridCard(
+                              context,
+                              icon: Icons.explore_rounded,
+                              title: 'Explore Careers',
+                              description: 'Discover IT paths',
+                              gradient: const LinearGradient(
+                                colors: [Color(0xFF6A5AE0), Color(0xFF9D8DF1)],
+                                begin: Alignment.topLeft,
+                                end: Alignment.bottomRight,
+                              ),
+                              width: cardWidth,
+                              onTap: () {
+                                onNavigateToTab?.call(1);
+                              },
+                            ),
+                            _buildGridCard(
+                              context,
+                              icon: Icons.psychology_rounded,
+                              title: 'AI Career Quiz',
+                              description: 'Get personalized suggestions',
+                              gradient: const LinearGradient(
+                                colors: [Color(0xFFFF6B9D), Color(0xFFC06C84)],
+                                begin: Alignment.topLeft,
+                                end: Alignment.bottomRight,
+                              ),
+                              width: cardWidth,
+                              onTap: () {
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (context) =>
+                                        const RecommendationQuizScreen(),
+                                  ),
+                                );
+                              },
+                            ),
+                            _buildGridCard(
+                              context,
+                              icon: Icons.emoji_events_rounded,
+                              title: 'Achievements',
+                              description: 'Track progress & badges',
+                              gradient: const LinearGradient(
+                                colors: [Color(0xFFFFA500), Color(0xFFFFD700)],
+                                begin: Alignment.topLeft,
+                                end: Alignment.bottomRight,
+                              ),
+                              width: cardWidth,
+                              onTap: () {
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (context) => const BadgesScreen(),
+                                  ),
+                                );
+                              },
+                            ),
+                            _buildGridCard(
+                              context,
+                              icon: Icons.smart_toy_rounded,
+                              title: 'AI Mentor',
+                              description: 'Chat for career guidance',
+                              gradient: const LinearGradient(
+                                colors: [Color(0xFF00BFA5), Color(0xFF00D9A5)],
+                                begin: Alignment.topLeft,
+                                end: Alignment.bottomRight,
+                              ),
+                              width: cardWidth,
+                              onTap: () {
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (context) =>
+                                        const AIChatbotScreen(),
+                                  ),
+                                );
+                              },
+                            ),
+                            _buildGridCard(
+                              context,
+                              icon: Icons.description_rounded,
+                              title: 'Resume Builder',
+                              description: 'AI-powered feedback',
+                              gradient: const LinearGradient(
+                                colors: [Color(0xFF42A5F5), Color(0xFF478DE0)],
+                                begin: Alignment.topLeft,
+                                end: Alignment.bottomRight,
+                              ),
+                              width: cardWidth,
+                              onTap: () {
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (context) =>
+                                        const ResumeBuilderScreen(),
+                                  ),
+                                );
+                              },
+                            ),
+                            _buildGridCard(
+                              context,
+                              icon: Icons.help_rounded,
+                              title: 'Help & Support',
+                              description: 'Find answers & help',
+                              gradient: const LinearGradient(
+                                colors: [Color(0xFFEF5350), Color(0xFFE57373)],
+                                begin: Alignment.topLeft,
+                                end: Alignment.bottomRight,
+                              ),
+                              width: cardWidth,
+                              onTap: () {
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (context) =>
+                                        const HelpSupportScreen(),
+                                  ),
+                                );
+                              },
+                            ),
+                          ],
                         );
                       },
                     ),
@@ -432,57 +459,78 @@ class HomeTabScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildMenuCard(
+  Widget _buildGridCard(
     BuildContext context, {
     required IconData icon,
     required String title,
     required String description,
+    required Gradient gradient,
+    required double width,
     VoidCallback? onTap,
   }) {
-    return InkWell(
+    return GestureDetector(
       onTap: onTap,
-      borderRadius: BorderRadius.circular(12),
       child: Container(
-        padding: const EdgeInsets.all(16),
+        width: width,
+        height: 160,
         decoration: BoxDecoration(
-          color: Colors.grey[100],
-          borderRadius: BorderRadius.circular(12),
-        ),
-        child: Row(
-          children: [
-            Container(
-              padding: const EdgeInsets.all(12),
-              decoration: BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.circular(10),
-              ),
-              child: Icon(icon, size: 28, color: Colors.black),
+          gradient: gradient,
+          borderRadius: BorderRadius.circular(20),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withOpacity(0.15),
+              blurRadius: 10,
+              offset: const Offset(0, 4),
             ),
-            const SizedBox(width: 16),
-            Expanded(
-              child: Column(
+          ],
+        ),
+        child: Padding(
+          padding: const EdgeInsets.all(20),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Container(
+                padding: const EdgeInsets.all(12),
+                decoration: BoxDecoration(
+                  color: Colors.white.withOpacity(0.25),
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: Icon(
+                  icon,
+                  size: 32,
+                  color: Colors.white,
+                ),
+              ),
+              Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
                     title,
                     style: GoogleFonts.poppins(
                       fontWeight: FontWeight.bold,
-                      fontSize: 16,
-                      color: Colors.black,
+                      fontSize: 15,
+                      color: Colors.white,
+                      height: 1.2,
                     ),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
                   ),
                   const SizedBox(height: 4),
                   Text(
                     description,
                     style: GoogleFonts.poppins(
-                      color: Colors.grey[600],
-                      fontSize: 13,
+                      fontSize: 12,
+                      color: Colors.white.withOpacity(0.9),
+                      height: 1.3,
                     ),
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
                   ),
                 ],
               ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );

@@ -111,40 +111,95 @@ class _LoginScreenState extends State<LoginScreen> {
               // Top Blue Section with Logo and Text
               Container(
                 width: double.infinity,
-                decoration: const BoxDecoration(
-                  color: Color(0xFF2c6894), // Azure blue
-                  borderRadius: BorderRadius.only(
+                decoration: BoxDecoration(
+                  color: const Color(0xFF2c6894), // Azure blue
+                  borderRadius: const BorderRadius.only(
                     bottomLeft: Radius.circular(30),
                     bottomRight: Radius.circular(30),
+                  ),
+                  boxShadow: [
+                    BoxShadow(
+                      color: const Color(0xFF2c6894).withOpacity(0.4),
+                      blurRadius: 30,
+                      spreadRadius: 5,
+                      offset: const Offset(0, 15),
+                    ),
+                    BoxShadow(
+                      color: Colors.blue.withOpacity(0.3),
+                      blurRadius: 50,
+                      spreadRadius: -10,
+                      offset: const Offset(0, 25),
+                    ),
+                  ],
+                  gradient: LinearGradient(
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
+                    colors: [
+                      const Color(0xFF2c6894),
+                      const Color(0xFF2c6894).withOpacity(0.8),
+                      const Color(0xFF1e4d6b),
+                    ],
                   ),
                 ),
                 padding:
                     const EdgeInsets.symmetric(vertical: 50, horizontal: 20),
                 child: Column(
                   children: [
-                    // Logo
-                    Image.asset(
-                      'assets/images/logo.png',
-                      width: 100,
-                      height: 100,
-                      fit: BoxFit.contain,
-                      errorBuilder: (context, error, stackTrace) {
-                        // Fallback icon if logo not found
-                        return Icon(
-                          Icons.school_rounded,
-                          size: 70,
-                          color: Colors.white,
-                        );
-                      },
+                    // Logo with Glow
+                    Container(
+                      decoration: BoxDecoration(
+                        shape: BoxShape.circle,
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.white.withOpacity(0.3),
+                            blurRadius: 20,
+                            spreadRadius: 5,
+                          ),
+                        ],
+                      ),
+                      child: Image.asset(
+                        'assets/images/logo.png',
+                        width: 100,
+                        height: 100,
+                        fit: BoxFit.contain,
+                        errorBuilder: (context, error, stackTrace) {
+                          return Container(
+                            padding: const EdgeInsets.all(15),
+                            decoration: BoxDecoration(
+                              shape: BoxShape.circle,
+                              color: Colors.white.withOpacity(0.2),
+                            ),
+                            child: const Icon(
+                              Icons.school_rounded,
+                              size: 70,
+                              color: Colors.white,
+                            ),
+                          );
+                        },
+                      ),
                     ),
+                    const SizedBox(height: 15),
 
                     // Tagline
-                    const Text(
-                      'Your AI-Powered Career Tracker',
-                      style: TextStyle(
-                        color: Colors.white,
-                        fontSize: 14,
-                        fontWeight: FontWeight.w400,
+                    Container(
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 20, vertical: 8),
+                      decoration: BoxDecoration(
+                        color: Colors.white.withOpacity(0.1),
+                        borderRadius: BorderRadius.circular(20),
+                        border: Border.all(
+                          color: Colors.white.withOpacity(0.3),
+                          width: 1,
+                        ),
+                      ),
+                      child: const Text(
+                        'Your AI-Powered Career Tracker',
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontSize: 14,
+                          fontWeight: FontWeight.w600,
+                          letterSpacing: 0.5,
+                        ),
                       ),
                     ),
                   ],
@@ -284,9 +339,36 @@ class _LoginScreenState extends State<LoginScreen> {
                           onPressed: () {
                             Navigator.push(
                               context,
-                              MaterialPageRoute(
-                                builder: (context) =>
-                                    const ForgotPasswordScreen(),
+                              PageRouteBuilder(
+                                pageBuilder:
+                                    (context, animation, secondaryAnimation) =>
+                                        const ForgotPasswordScreen(),
+                                transitionsBuilder: (context, animation,
+                                    secondaryAnimation, child) {
+                                  var fadeAnimation =
+                                      Tween<double>(begin: 0.0, end: 1.0)
+                                          .animate(
+                                    CurvedAnimation(
+                                        parent: animation,
+                                        curve: Curves.easeInOut),
+                                  );
+                                  var scaleAnimation =
+                                      Tween<double>(begin: 0.8, end: 1.0)
+                                          .animate(
+                                    CurvedAnimation(
+                                        parent: animation,
+                                        curve: Curves.easeOutBack),
+                                  );
+                                  return FadeTransition(
+                                    opacity: fadeAnimation,
+                                    child: ScaleTransition(
+                                      scale: scaleAnimation,
+                                      child: child,
+                                    ),
+                                  );
+                                },
+                                transitionDuration:
+                                    const Duration(milliseconds: 500),
                               ),
                             );
                           },
@@ -317,8 +399,36 @@ class _LoginScreenState extends State<LoginScreen> {
                             onPressed: () {
                               Navigator.push(
                                 context,
-                                MaterialPageRoute(
-                                  builder: (context) => const RegisterScreen(),
+                                PageRouteBuilder(
+                                  pageBuilder: (context, animation,
+                                          secondaryAnimation) =>
+                                      const RegisterScreen(),
+                                  transitionsBuilder: (context, animation,
+                                      secondaryAnimation, child) {
+                                    var fadeAnimation =
+                                        Tween<double>(begin: 0.0, end: 1.0)
+                                            .animate(
+                                      CurvedAnimation(
+                                          parent: animation,
+                                          curve: Curves.easeInOut),
+                                    );
+                                    var scaleAnimation =
+                                        Tween<double>(begin: 0.8, end: 1.0)
+                                            .animate(
+                                      CurvedAnimation(
+                                          parent: animation,
+                                          curve: Curves.easeOutBack),
+                                    );
+                                    return FadeTransition(
+                                      opacity: fadeAnimation,
+                                      child: ScaleTransition(
+                                        scale: scaleAnimation,
+                                        child: child,
+                                      ),
+                                    );
+                                  },
+                                  transitionDuration:
+                                      const Duration(milliseconds: 500),
                                 ),
                               );
                             },
