@@ -406,7 +406,7 @@ class HomeTabScreen extends StatelessWidget {
                             _buildGridCard(
                               context,
                               icon: Icons.description_rounded,
-                              title: 'Resume Builder',
+                              title: 'AI Feedback Resume',
                               description: 'AI-powered feedback',
                               gradient: const LinearGradient(
                                 colors: [Color(0xFFB4DFED), Color(0xFFC2E5F1)],

@@ -223,7 +223,7 @@ ${_projectsController.text}
                 const SizedBox(width: 8),
                 Expanded(
                   child: Text(
-                    'Resume Builder',
+                    'AI Feedback Resume',
                     style: GoogleFonts.poppins(
                       color: Colors.white,
                       fontSize: 24,
@@ -719,7 +719,7 @@ ${_projectsController.text}
           children: [
             Icon(Icons.help_outline, color: Colors.blue),
             SizedBox(width: 8),
-            Text('Resume Builder Tips'),
+            Text('AI Feedback Resume Tips'),
           ],
         ),
         content: SingleChildScrollView(
