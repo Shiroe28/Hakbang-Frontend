@@ -23,6 +23,7 @@ class _ModuleAssessmentScreenState extends State<ModuleAssessmentScreen> {
   bool _isLoading = true;
   bool _isSubmitting = false;
   final Map<int, String> _selectedAnswers = {};
+  final Map<int, int> _selectedAnswerIndices = {}; // Store indices for comparison
   Map<String, dynamic>? _results;
   
   // Slideshow state
@@ -90,15 +91,68 @@ class _ModuleAssessmentScreenState extends State<ModuleAssessmentScreen> {
       );
 
       print('✅ Assessment submitted: $results');
+      print('🔍 DEBUG - Extracting results:');
+      print('   Raw score: ${results['score']}');
+      print('   Raw totalQuestions: ${results['totalQuestions']}');
+      print('   Raw percentage: ${results['percentage']}');
+      print('   Raw passed: ${results['passed']}');
+      print('   Raw feedback: ${results['feedback']}');
+      print('   Raw results array: ${results['results']}');
+
+      // Check if submission failed
+      if (results['success'] == false) {
+        setState(() => _isSubmitting = false);
+        if (mounted) {
+          final errorMessage = results['message'] ?? 'Unknown error';
+          print('❌ Submission failed: $errorMessage');
+          
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const Text(
+                    '❌ Assessment Submission Failed',
+                    style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+                  ),
+                  const SizedBox(height: 4),
+                  Text(errorMessage),
+                  if (errorMessage.contains('careerId')) ...[
+                    const SizedBox(height: 8),
+                    const Text(
+                      'Backend Issue: The server is not reading careerId from the request.',
+                      style: TextStyle(fontSize: 12, fontStyle: FontStyle.italic),
+                    ),
+                  ],
+                ],
+              ),
+              backgroundColor: Colors.red,
+              duration: const Duration(seconds: 8),
+              action: SnackBarAction(
+                label: 'Dismiss',
+                textColor: Colors.white,
+                onPressed: () {},
+              ),
+            ),
+          );
+        }
+        return;
+      }
 
       setState(() {
         _results = {
-          'score': results['score'],
-          'total': results['totalQuestions'],
-          'percentage': results['percentage'],
-          'passed': (results['percentage'] ?? 0) >= 70,
+          'score': results['score'] ?? 0,
+          'total': results['totalQuestions'] ?? _assessment!.questions.length,
+          'percentage': results['percentage'] ?? 0,
+          'passed': results['passed'] ?? ((results['percentage'] ?? 0) >= 70),
           'feedback': results['feedback'],
+          'detailedResults': results['results'], // Backend's detailed question breakdown
         };
+        print('🎯 STORED _results:');
+        print('   score: ${_results!['score']}');
+        print('   total: ${_results!['total']}');
+        print('   percentage: ${_results!['percentage']}');
         _isSubmitting = false;
       });
 
@@ -270,6 +324,7 @@ class _ModuleAssessmentScreenState extends State<ModuleAssessmentScreen> {
                           onTap: () {
                             setState(() {
                               _selectedAnswers[_currentQuestionIndex] = optionText;
+                              _selectedAnswerIndices[_currentQuestionIndex] = optionIndex;
                             });
                           },
                           borderRadius: BorderRadius.circular(12),
@@ -437,10 +492,19 @@ class _ModuleAssessmentScreenState extends State<ModuleAssessmentScreen> {
   }
 
   Widget _buildResults() {
+    print('🎨 Building results display...');
+    print('   _results map: $_results');
+    
     final score = _results!['score'] ?? 0;
     final total = _results!['total'] ?? _assessment!.questions.length;
-    final percentage = ((score / total) * 100).round();
+    final percentage = _results!['percentage'] ?? ((score / total) * 100).round();
     final passed = _results!['passed'] ?? false;
+    
+    print('   📊 Display values:');
+    print('      score: $score (type: ${score.runtimeType})');
+    print('      total: $total (type: ${total.runtimeType})');
+    print('      percentage: $percentage (type: ${percentage.runtimeType})');
+    print('      passed: $passed');
 
     return SingleChildScrollView(
       padding: const EdgeInsets.all(20),
@@ -513,6 +577,191 @@ class _ModuleAssessmentScreenState extends State<ModuleAssessmentScreen> {
 
           const SizedBox(height: 24),
 
+          // Question Breakdown
+          Card(
+            child: Padding(
+              padding: const EdgeInsets.all(16),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const Row(
+                    children: [
+                      Icon(Icons.list_alt, color: Colors.blue),
+                      SizedBox(width: 8),
+                      Text(
+                        'Question Breakdown',
+                        style: TextStyle(
+                          fontSize: 18,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 16),
+                  ..._assessment!.questions.asMap().entries.map((entry) {
+                    final index = entry.key;
+                    final question = entry.value;
+                    
+                    // Try to use backend's detailed results first
+                    final detailedResults = _results!['detailedResults'] as List?;
+                    int userAnswerIndex;
+                    int correctAnswerIndex;
+                    bool isCorrect;
+                    
+                    if (detailedResults != null && index < detailedResults.length) {
+                      // Use backend data (more reliable)
+                      final backendResult = detailedResults[index];
+                      userAnswerIndex = backendResult['userAnswer'] ?? -1;
+                      correctAnswerIndex = backendResult['correctAnswer'] ?? question.correctOption;
+                      isCorrect = backendResult['isCorrect'] ?? false;
+                      print('📊 Q${index + 1}: Using BACKEND data - user:$userAnswerIndex, correct:$correctAnswerIndex, isCorrect:$isCorrect');
+                    } else {
+                      // Fall back to frontend calculation
+                      userAnswerIndex = _selectedAnswerIndices[index] ?? -1;
+                      correctAnswerIndex = question.correctOption;
+                      isCorrect = userAnswerIndex == correctAnswerIndex;
+                      print('📊 Q${index + 1}: Using FRONTEND data - user:$userAnswerIndex, correct:$correctAnswerIndex, isCorrect:$isCorrect');
+                    }
+                    
+                    return Container(
+                      margin: const EdgeInsets.only(bottom: 12),
+                      padding: const EdgeInsets.all(16),
+                      decoration: BoxDecoration(
+                        color: isCorrect 
+                          ? Colors.green.shade50 
+                          : Colors.red.shade50,
+                        border: Border.all(
+                          color: isCorrect ? Colors.green : Colors.red,
+                          width: 2,
+                        ),
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Row(
+                            children: [
+                              Icon(
+                                isCorrect ? Icons.check_circle : Icons.cancel,
+                                color: isCorrect ? Colors.green : Colors.red,
+                                size: 24,
+                              ),
+                              const SizedBox(width: 8),
+                              Expanded(
+                                child: Text(
+                                  'Question ${index + 1}',
+                                  style: TextStyle(
+                                    fontSize: 16,
+                                    fontWeight: FontWeight.bold,
+                                    color: isCorrect ? Colors.green.shade900 : Colors.red.shade900,
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                          const SizedBox(height: 8),
+                          Text(
+                            question.questionText,
+                            style: const TextStyle(
+                              fontSize: 15,
+                              fontWeight: FontWeight.w500,
+                            ),
+                          ),
+                          const SizedBox(height: 12),
+                          // User's Answer
+                          Container(
+                            padding: const EdgeInsets.all(12),
+                            decoration: BoxDecoration(
+                              color: Colors.white,
+                              borderRadius: BorderRadius.circular(8),
+                            ),
+                            child: Row(
+                              children: [
+                                Icon(
+                                  Icons.person,
+                                  size: 18,
+                                  color: isCorrect ? Colors.green : Colors.red,
+                                ),
+                                const SizedBox(width: 8),
+                                Expanded(
+                                  child: RichText(
+                                    text: TextSpan(
+                                      style: const TextStyle(fontSize: 14, color: Colors.black87),
+                                      children: [
+                                        const TextSpan(
+                                          text: 'Your answer: ',
+                                          style: TextStyle(fontWeight: FontWeight.w500),
+                                        ),
+                                        TextSpan(
+                                          text: userAnswerIndex >= 0 && userAnswerIndex < question.options.length
+                                            ? '${String.fromCharCode(65 + userAnswerIndex)}. ${question.options[userAnswerIndex]}'
+                                            : 'Not answered',
+                                          style: TextStyle(
+                                            color: isCorrect ? Colors.green.shade700 : Colors.red.shade700,
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                          if (!isCorrect) ...[
+                            const SizedBox(height: 8),
+                            // Correct Answer
+                            Container(
+                              padding: const EdgeInsets.all(12),
+                              decoration: BoxDecoration(
+                                color: Colors.green.shade50,
+                                borderRadius: BorderRadius.circular(8),
+                                border: Border.all(color: Colors.green.shade200),
+                              ),
+                              child: Row(
+                                children: [
+                                  Icon(
+                                    Icons.check,
+                                    size: 18,
+                                    color: Colors.green.shade700,
+                                  ),
+                                  const SizedBox(width: 8),
+                                  Expanded(
+                                    child: RichText(
+                                      text: TextSpan(
+                                        style: const TextStyle(fontSize: 14, color: Colors.black87),
+                                        children: [
+                                          const TextSpan(
+                                            text: 'Correct answer: ',
+                                            style: TextStyle(fontWeight: FontWeight.w500),
+                                          ),
+                                          TextSpan(
+                                            text: correctAnswerIndex >= 0 && correctAnswerIndex < question.options.length
+                                              ? '${String.fromCharCode(65 + correctAnswerIndex)}. ${question.options[correctAnswerIndex]}'
+                                              : 'N/A',
+                                            style: TextStyle(
+                                              color: Colors.green.shade700,
+                                              fontWeight: FontWeight.w600,
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ],
+                        ],
+                      ),
+                    );
+                  }),
+                ],
+              ),
+            ),
+          ),
+
+          const SizedBox(height: 16),
+
           // Feedback
           if (_results!['feedback'] != null) ...[
             Card(
@@ -575,6 +824,8 @@ class _ModuleAssessmentScreenState extends State<ModuleAssessmentScreen> {
                   setState(() {
                     _results = null;
                     _selectedAnswers.clear();
+                    _selectedAnswerIndices.clear();
+                    _currentQuestionIndex = 0;
                   });
                   _loadAssessment();
                 },

@@ -323,25 +323,40 @@ class ApiService {
       if (response.statusCode == 200) {
         final decoded = jsonDecode(response.body);
         
+        print('🔍 Decoded response structure: ${decoded.keys}');
+        if (decoded.containsKey('data')) {
+          print('   data keys: ${decoded['data'].keys}');
+          print('   score value: ${decoded['data']['score']}');
+          print('   total value: ${decoded['data']['total']}');
+        }
+        
         // Backend returns: { success: true, data: { score, total, percentage, passed } }
         if (decoded is Map && decoded.containsKey('data')) {
           final data = decoded['data'];
-          return {
+          final result = {
             'success': true,
             'score': data['score'] ?? 0,
             'totalQuestions': data['total'] ?? answers.length,
             'percentage': data['percentage'] ?? 0.0,
             'passed': data['passed'] ?? false,
+            'feedback': data['feedback'],
+            'results': data['results'], // Detailed question results if backend provides
           };
+          print('✅ Parsed result: score=${result['score']}, total=${result['totalQuestions']}, percentage=${result['percentage']}');
+          return result;
         } else if (decoded is Map && decoded.containsKey('score')) {
           // Direct response format
-          return {
+          final result = {
             'success': true,
             'score': decoded['score'] ?? 0,
             'totalQuestions': decoded['total'] ?? answers.length,
             'percentage': decoded['percentage'] ?? 0.0,
             'passed': decoded['passed'] ?? false,
+            'feedback': decoded['feedback'],
+            'results': decoded['results'],
           };
+          print('✅ Parsed result (direct): score=${result['score']}, total=${result['totalQuestions']}');
+          return result;
         } else {
           return {'success': false, 'message': 'Unexpected response format'};
         }
