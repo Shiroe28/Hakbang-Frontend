@@ -2,14 +2,216 @@ import 'package:flutter/material.dart';
 import 'package:url_launcher/url_launcher.dart';
 import '../models/module_model.dart';
 import 'module_assessment_screen.dart';
+import '../services/api_service.dart';
 
-class ModuleDetailScreen extends StatelessWidget {
+class ModuleDetailScreen extends StatefulWidget {
   final Module module;
 
   const ModuleDetailScreen({super.key, required this.module});
 
+  @override
+  State<ModuleDetailScreen> createState() => _ModuleDetailScreenState();
+}
+
+class _ModuleDetailScreenState extends State<ModuleDetailScreen> {
+  bool _isCompleting = false;
+  late Module _module;
+
+  @override
+  void initState() {
+    super.initState();
+    _module = widget.module;
+  }
+
+  Future<void> _toggleCompletion() async {
+    setState(() => _isCompleting = true);
+    
+    try {
+      final isCurrentlyCompleted = _module.isCompleted;
+      print('🎯 ${isCurrentlyCompleted ? "Unmarking" : "Marking"} module as complete: ${_module.id}');
+      print('🎯 Career ID: ${_module.careerId}');
+      
+      final result = isCurrentlyCompleted
+          ? await ApiService.markModuleIncomplete(
+              _module.id,
+              _module.careerId,
+            )
+          : await ApiService.markModuleComplete(
+              _module.id,
+              _module.careerId,
+            );
+      
+      if (result['success'] == true) {
+        setState(() {
+          _module = _module.copyWith(isCompleted: !isCurrentlyCompleted);
+          _isCompleting = false;
+        });
+        
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(isCurrentlyCompleted 
+                ? '🔄 Module marked as incomplete!'
+                : '✅ Module marked as complete!'),
+              backgroundColor: isCurrentlyCompleted ? Colors.orange : Colors.green,
+            ),
+          );
+        }
+        
+        // Check if badge was earned (only when completing, not uncompleting)
+        if (!isCurrentlyCompleted && result['badgeEarned'] == true && result['badge'] != null) {
+          final badge = result['badge'];
+          if (mounted) {
+            _showAchievementDialog(
+              title: badge['title'] ?? 'Achievement Unlocked!',
+              description: badge['description'] ?? 'Great job!',
+              icon: badge['icon'] ?? '🏆',
+            );
+            
+            // Create notification for the earned badge
+            await ApiService.createNotification(
+              title: '🏆 New Badge Earned!',
+              message: '${badge['icon']} ${badge['title']} - ${badge['description']}',
+              type: 'badge',
+            );
+          }
+        }
+        
+        // Create milestone notification when completing
+        if (!isCurrentlyCompleted && mounted) {
+          await ApiService.createNotification(
+            title: '📚 Module Completed',
+            message: 'Great job! You completed "${_module.title}"',
+            type: 'milestone',
+          );
+        }
+      } else {
+        setState(() => _isCompleting = false);
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text('❌ ${result['message'] ?? "Failed to update module status"}'),
+              backgroundColor: Colors.red,
+            ),
+          );
+        }
+      }
+    } catch (e) {
+      print('❌ Error toggling completion: $e');
+      setState(() => _isCompleting = false);
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Error: $e'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+    }
+  }
+
+  void _showAchievementDialog({
+    required String title,
+    required String description,
+    required String icon,
+  }) {
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (BuildContext context) {
+        return Dialog(
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+          child: Container(
+            padding: const EdgeInsets.all(24),
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                colors: [Colors.purple.shade400, Colors.blue.shade400],
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+              ),
+              borderRadius: BorderRadius.circular(20),
+            ),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                const Text(
+                  '🎉 Achievement Unlocked! 🎉',
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontSize: 20,
+                    fontWeight: FontWeight.bold,
+                  ),
+                  textAlign: TextAlign.center,
+                ),
+                const SizedBox(height: 24),
+                TweenAnimationBuilder(
+                  tween: Tween<double>(begin: 0, end: 1),
+                  duration: const Duration(milliseconds: 800),
+                  curve: Curves.elasticOut,
+                  builder: (context, double value, child) {
+                    return Transform.scale(
+                      scale: value,
+                      child: Text(
+                        icon,
+                        style: const TextStyle(fontSize: 80),
+                      ),
+                    );
+                  },
+                ),
+                const SizedBox(height: 24),
+                Text(
+                  title,
+                  style: const TextStyle(
+                    color: Colors.white,
+                    fontSize: 24,
+                    fontWeight: FontWeight.bold,
+                  ),
+                  textAlign: TextAlign.center,
+                ),
+                const SizedBox(height: 12),
+                Text(
+                  description,
+                  style: TextStyle(
+                    color: Colors.white.withOpacity(0.9),
+                    fontSize: 16,
+                  ),
+                  textAlign: TextAlign.center,
+                ),
+                const SizedBox(height: 32),
+                Row(
+                  children: [
+                    Expanded(
+                      child: ElevatedButton(
+                        onPressed: () => Navigator.pop(context),
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Colors.white,
+                          foregroundColor: Colors.purple,
+                          padding: const EdgeInsets.symmetric(vertical: 12),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                        ),
+                        child: const Text(
+                          'Awesome!',
+                          style: TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          ),
+        );
+      },
+    );
+  }
+
   Future<void> _launchURL(BuildContext context) async {
-    final url = Uri.parse(module.contentURL);
+    final url = Uri.parse(_module.contentURL);
     try {
       if (await canLaunchUrl(url)) {
         await launchUrl(url, mode: LaunchMode.externalApplication);
@@ -71,7 +273,7 @@ class ModuleDetailScreen extends StatelessWidget {
                       borderRadius: BorderRadius.circular(16),
                     ),
                     child: Icon(
-                      module.contentType == 'link'
+                      _module.contentType == 'link'
                           ? Icons.link
                           : Icons.video_library,
                       color: Colors.white,
@@ -82,7 +284,7 @@ class ModuleDetailScreen extends StatelessWidget {
 
                   // Title
                   Text(
-                    module.title,
+                    _module.title,
                     style: const TextStyle(
                       color: Colors.white,
                       fontSize: 24,
@@ -111,7 +313,7 @@ class ModuleDetailScreen extends StatelessWidget {
                         ),
                         const SizedBox(width: 6),
                         Text(
-                          module.contentType.toUpperCase(),
+                          _module.contentType.toUpperCase(),
                           style: const TextStyle(
                             color: Colors.white,
                             fontWeight: FontWeight.w600,
@@ -140,7 +342,7 @@ class ModuleDetailScreen extends StatelessWidget {
                   ),
                   const SizedBox(height: 12),
                   Text(
-                    module.description,
+                    _module.description,
                     style: TextStyle(
                       fontSize: 16,
                       height: 1.6,
@@ -228,9 +430,9 @@ class ModuleDetailScreen extends StatelessWidget {
                           context,
                           MaterialPageRoute(
                             builder: (context) => ModuleAssessmentScreen(
-                              moduleId: module.id,
-                              moduleName: module.title,
-                              careerId: module.careerId,
+                              moduleId: _module.id,
+                              moduleName: _module.title,
+                              careerId: _module.careerId,
                             ),
                           ),
                         );
@@ -255,28 +457,28 @@ class ModuleDetailScreen extends StatelessWidget {
                   ),
                   const SizedBox(height: 16),
 
-                  // Mark as Complete Button (placeholder)
+                  // Mark as Complete/Incomplete Button
                   SizedBox(
                     width: double.infinity,
                     child: OutlinedButton.icon(
-                      onPressed: module.isCompleted
-                          ? null
-                          : () {
-                              // TODO: Implement mark as complete functionality
-                              ScaffoldMessenger.of(context).showSnackBar(
-                                const SnackBar(
-                                  content: Text(
-                                      'Mark as complete functionality coming soon!'),
-                                ),
-                              );
-                            },
-                      icon: Icon(
-                        module.isCompleted ? Icons.check_circle : Icons.circle_outlined,
-                      ),
+                      onPressed: _isCompleting ? null : _toggleCompletion,
+                      icon: _isCompleting
+                          ? const SizedBox(
+                              width: 20,
+                              height: 20,
+                              child: CircularProgressIndicator(
+                                strokeWidth: 2,
+                              ),
+                            )
+                          : Icon(
+                              _module.isCompleted ? Icons.check_circle : Icons.circle_outlined,
+                            ),
                       label: Text(
-                        module.isCompleted
-                            ? 'Completed'
-                            : 'Mark as Complete',
+                        _isCompleting
+                            ? 'Saving...'
+                            : _module.isCompleted
+                                ? 'Mark as Incomplete'
+                                : 'Mark as Complete',
                         style: const TextStyle(
                           fontSize: 16,
                           fontWeight: FontWeight.bold,
@@ -284,6 +486,7 @@ class ModuleDetailScreen extends StatelessWidget {
                       ),
                       style: OutlinedButton.styleFrom(
                         padding: const EdgeInsets.symmetric(vertical: 16),
+                        foregroundColor: _module.isCompleted ? Colors.green : null,
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(12),
                         ),

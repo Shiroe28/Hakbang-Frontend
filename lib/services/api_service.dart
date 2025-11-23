@@ -284,16 +284,176 @@ class ApiService {
   // Protected User APIs (Requires authentication)
 
   /// Mark a module as complete
-  static Future<bool> markModuleComplete(String moduleId) async {
+  static Future<Map<String, dynamic>> markModuleComplete(
+    String moduleId,
+    String careerId,
+  ) async {
     try {
+      print('📤 Marking module as complete: $moduleId');
+      print('📤 Career ID: $careerId');
+      
       final response = await http.put(
         Uri.parse('$baseUrl/learning/modules/$moduleId/progress'),
         headers: await _getHeaders(needsAuth: true),
+        body: jsonEncode({
+          'careerId': careerId,
+          'completed': true,
+        }),
       );
 
-      return response.statusCode == 200;
+      print('📥 Mark complete response status: ${response.statusCode}');
+      print('📦 Mark complete response body: ${response.body}');
+
+      if (response.statusCode == 200) {
+        final decoded = jsonDecode(response.body);
+        
+        if (decoded['success'] == true) {
+          final data = decoded['data'] ?? {};
+          return {
+            'success': true,
+            'badgeEarned': data['badgeEarned'] ?? false,
+            'badge': data['badge'],
+            'message': decoded['message'] ?? 'Module marked as complete',
+          };
+        } else {
+          return {
+            'success': false,
+            'message': decoded['message'] ?? 'Failed to mark as complete',
+          };
+        }
+      } else {
+        final error = jsonDecode(response.body);
+        return {
+          'success': false,
+          'message': error['message'] ?? error['error'] ?? 'Failed to mark as complete',
+        };
+      }
     } catch (e) {
-      throw Exception('Error marking module as complete: $e');
+      print('❌ Error marking module complete: $e');
+      return {
+        'success': false,
+        'message': 'Error: $e',
+      };
+    }
+  }
+
+  /// Mark a module as incomplete
+  static Future<Map<String, dynamic>> markModuleIncomplete(
+    String moduleId,
+    String careerId,
+  ) async {
+    try {
+      print('📤 Marking module as incomplete: $moduleId');
+      print('📤 Career ID: $careerId');
+      
+      final response = await http.put(
+        Uri.parse('$baseUrl/learning/modules/$moduleId/progress'),
+        headers: await _getHeaders(needsAuth: true),
+        body: jsonEncode({
+          'careerId': careerId,
+          'completed': false,
+        }),
+      );
+
+      print('📥 Mark incomplete response status: ${response.statusCode}');
+      print('📦 Mark incomplete response body: ${response.body}');
+
+      if (response.statusCode == 200) {
+        final decoded = jsonDecode(response.body);
+        
+        return {
+          'success': true,
+          'message': decoded['message'] ?? 'Module marked as incomplete',
+        };
+      } else {
+        final error = jsonDecode(response.body);
+        return {
+          'success': false,
+          'message': error['message'] ?? error['error'] ?? 'Failed to mark as incomplete',
+        };
+      }
+    } catch (e) {
+      print('❌ Error marking module incomplete: $e');
+      return {
+        'success': false,
+        'message': 'Error: $e',
+      };
+    }
+  }
+
+  /// Create a notification
+  static Future<void> createNotification({
+    required String title,
+    required String message,
+    required String type,
+  }) async {
+    try {
+      print('📤 Creating notification: $title');
+      
+      final response = await http.post(
+        Uri.parse('$baseUrl/notifications'),
+        headers: await _getHeaders(needsAuth: true),
+        body: jsonEncode({
+          'title': title,
+          'message': message,
+          'type': type,
+        }),
+      );
+
+      print('📥 Create notification response: ${response.statusCode}');
+      
+      if (response.statusCode == 201 || response.statusCode == 200) {
+        print('✅ Notification created successfully');
+      } else {
+        print('⚠️ Failed to create notification: ${response.statusCode}');
+      }
+    } catch (e) {
+      print('❌ Error creating notification: $e');
+      // Don't throw - notifications are non-critical
+    }
+  }
+
+  /// Fetch user notifications
+  static Future<List<Map<String, dynamic>>> fetchNotifications() async {
+    try {
+      print('📤 Fetching notifications');
+      
+      final response = await http.get(
+        Uri.parse('$baseUrl/notifications'),
+        headers: await _getHeaders(needsAuth: true),
+      );
+
+      print('📥 Fetch notifications response: ${response.statusCode}');
+
+      if (response.statusCode == 200) {
+        final decoded = jsonDecode(response.body);
+        
+        if (decoded['success'] == true) {
+          final List<dynamic> notificationsData = decoded['data'] ?? [];
+          return notificationsData.map((n) => n as Map<String, dynamic>).toList();
+        }
+      }
+      
+      return [];
+    } catch (e) {
+      print('❌ Error fetching notifications: $e');
+      return [];
+    }
+  }
+
+  /// Mark notification as read
+  static Future<void> markNotificationAsRead(String notificationId) async {
+    try {
+      print('📤 Marking notification as read: $notificationId');
+      
+      final response = await http.put(
+        Uri.parse('$baseUrl/notifications/$notificationId/read'),
+        headers: await _getHeaders(needsAuth: true),
+      );
+
+      print('📥 Mark read response: ${response.statusCode}');
+    } catch (e) {
+      print('❌ Error marking notification as read: $e');
     }
   }
 
@@ -1048,6 +1208,87 @@ class ApiService {
     } catch (e) {
       print('❌ Error fetching badges: $e');
       rethrow;
+    }
+  }
+
+  /// Fetch user progress for a specific career
+  static Future<Map<String, dynamic>> fetchUserProgress(String careerId) async {
+    try {
+      print('📤 Fetching user progress for career: $careerId');
+      
+      final response = await http.get(
+        Uri.parse('$baseUrl/users/progress/$careerId'),
+        headers: await _getHeaders(needsAuth: true),
+      );
+
+      print('📥 Progress response status: ${response.statusCode}');
+
+      if (response.statusCode == 200) {
+        final decoded = jsonDecode(response.body);
+        print('📦 Progress response: $decoded');
+        
+        if (decoded['success'] == true) {
+          final data = decoded['data'];
+          
+          // Handle array response (backend returns all progress records)
+          if (data is List) {
+            print('📋 Got array of ${data.length} progress records, filtering for career: $careerId');
+            
+            // Find the progress record for this specific career
+            final careerProgress = data.firstWhere(
+              (record) {
+                final recordCareerId = record['careerId'];
+                // Handle both string and object formats
+                final careerIdString = recordCareerId is String 
+                    ? recordCareerId 
+                    : recordCareerId['_id'] as String;
+                return careerIdString == careerId;
+              },
+              orElse: () => null,
+            );
+            
+            if (careerProgress != null) {
+              print('✅ Found progress for career: $careerId');
+              return careerProgress as Map<String, dynamic>;
+            } else {
+              print('⚠️ No progress found for career: $careerId');
+              return {
+                'careerId': careerId,
+                'completedModules': [],
+                'moduleProgress': []
+              };
+            }
+          } else {
+            // Handle single object response
+            print('✅ Fetched progress successfully');
+            return data as Map<String, dynamic>;
+          }
+        } else {
+          // Return empty progress if not found
+          return {
+            'careerId': careerId,
+            'completedModules': [],
+            'moduleProgress': []
+          };
+        }
+      } else if (response.statusCode == 404) {
+        // No progress yet, return empty
+        return {
+          'careerId': careerId,
+          'completedModules': [],
+          'moduleProgress': []
+        };
+      } else {
+        throw Exception('Failed to fetch progress: HTTP ${response.statusCode}');
+      }
+    } catch (e) {
+      print('❌ Error fetching progress: $e');
+      // Return empty progress on error
+      return {
+        'careerId': careerId,
+        'completedModules': [],
+        'moduleProgress': []
+      };
     }
   }
 }

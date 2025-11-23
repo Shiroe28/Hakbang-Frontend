@@ -35,13 +35,45 @@ class _CareerDetailScreenState extends State<CareerDetailScreen> {
       print(
           '🎯 CareerDetailScreen: Loading modules for career ID: "${widget.career.id}"');
       print('🎯 Career title: "${widget.career.title}"');
-      final modules = await ApiService.getModules(careerId: widget.career.id);
+      
+      // Fetch modules and user progress in parallel
+      final modulesResponse = await ApiService.getModules(careerId: widget.career.id);
+      final progressData = await ApiService.fetchUserProgress(widget.career.id);
+      
+      // Get completed module IDs from progress
+      final List<dynamic> moduleProgress = progressData['moduleProgress'] ?? [];
+      final Set<String> completedModuleIds = {};
+      
+      for (var progress in moduleProgress) {
+        if (progress['completed'] == true) {
+          final moduleId = progress['moduleId'];
+          if (moduleId != null) {
+            // Handle both string and object formats
+            final moduleIdString = moduleId is String 
+                ? moduleId 
+                : moduleId['_id'] as String;
+            completedModuleIds.add(moduleIdString);
+            print('➕ Added completed module ID: $moduleIdString');
+          }
+        }
+      }
+      
+      print('✅ Found ${completedModuleIds.length} completed modules');
+      print('📋 Completed IDs: $completedModuleIds');
+      
+      // Mark modules as completed based on progress
+      final updatedModules = modulesResponse.map((module) {
+        final isCompleted = completedModuleIds.contains(module.id);
+        print('📌 Module ${module.title}: ${isCompleted ? "✅ Completed" : "⭕ Not completed"}');
+        return module.copyWith(isCompleted: isCompleted);
+      }).toList();
+      
       if (mounted) {
         setState(() {
-          _modules = modules;
+          _modules = updatedModules;
           _isLoading = false;
         });
-        print('✅ CareerDetailScreen: Loaded ${modules.length} modules');
+        print('✅ CareerDetailScreen: Loaded ${updatedModules.length} modules');
       }
     } catch (e) {
       print('❌ CareerDetailScreen: Error loading modules: $e');
@@ -326,13 +358,17 @@ class _CareerDetailScreenState extends State<CareerDetailScreen> {
       margin: const EdgeInsets.only(bottom: 16),
       elevation: 2,
       child: InkWell(
-        onTap: () {
-          Navigator.push(
+        onTap: () async {
+          // Navigate to module detail and wait for result
+          await Navigator.push(
             context,
             MaterialPageRoute(
               builder: (context) => ModuleDetailScreen(module: module),
             ),
           );
+          
+          // Reload modules when returning to refresh completion status
+          _loadModules();
         },
         borderRadius: BorderRadius.circular(16),
         child: Padding(

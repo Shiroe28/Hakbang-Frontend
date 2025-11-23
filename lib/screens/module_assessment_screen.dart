@@ -164,14 +164,31 @@ class _ModuleAssessmentScreenState extends State<ModuleAssessmentScreen> {
           
           // Check if new badge was earned
           if (badgeData['newBadgeEarned'] == true && badgeData['badge'] != null) {
+            final badge = badgeData['badge'];
             // Show achievement popup
             if (mounted) {
               _showAchievementDialog(
-                title: badgeData['badge']['title'] ?? 'Achievement Unlocked!',
-                description: badgeData['badge']['description'] ?? 'Great job!',
-                icon: badgeData['badge']['icon'] ?? '🏆',
+                title: badge['title'] ?? 'Achievement Unlocked!',
+                description: badge['description'] ?? 'Great job!',
+                icon: badge['icon'] ?? '🏆',
+              );
+              
+              // Create notification for the earned badge
+              await ApiService.createNotification(
+                title: '🏆 New Badge Earned!',
+                message: '${badge['icon']} ${badge['title']} - ${badge['description']}',
+                type: 'badge',
               );
             }
+          }
+          
+          // Create milestone notification for passing assessment
+          if (mounted) {
+            await ApiService.createNotification(
+              title: '✅ Assessment Passed',
+              message: 'Congratulations! You scored ${results['percentage']}% on the assessment',
+              type: 'milestone',
+            );
           }
         } catch (e) {
           print('⚠️ Could not fetch badges: $e');

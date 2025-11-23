@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../services/storage_service.dart';
+import '../services/api_service.dart';
 import '../providers/user_provider.dart';
 import 'login_screen.dart';
 
@@ -16,11 +17,14 @@ class DashboardScreen extends StatefulWidget {
 class _DashboardScreenState extends State<DashboardScreen> {
   String? _username;
   String? _email;
+  List<Map<String, dynamic>> _recentMilestones = [];
+  bool _isLoadingMilestones = false;
 
   @override
   void initState() {
     super.initState();
     _loadUserData();
+    _loadRecentMilestones();
   }
 
   Future<void> _loadUserData() async {
@@ -40,6 +44,28 @@ class _DashboardScreenState extends State<DashboardScreen> {
       _username = username;
       _email = email;
     });
+  }
+
+  Future<void> _loadRecentMilestones() async {
+    setState(() => _isLoadingMilestones = true);
+    
+    try {
+      final notifications = await ApiService.fetchNotifications();
+      
+      // Filter for milestone notifications, take latest 3
+      final milestones = notifications
+          .where((n) => n['type'] == 'milestone' || n['type'] == 'badge')
+          .take(3)
+          .toList();
+      
+      setState(() {
+        _recentMilestones = milestones;
+        _isLoadingMilestones = false;
+      });
+    } catch (e) {
+      print('❌ Error loading milestones: $e');
+      setState(() => _isLoadingMilestones = false);
+    }
   }
 
   Future<void> _handleLogout() async {
@@ -182,27 +208,75 @@ class _DashboardScreenState extends State<DashboardScreen> {
               ),
               const SizedBox(height: 32),
 
-              // Coming Soon Note
+              // Recent Milestones Section
               Container(
                 padding: const EdgeInsets.all(16),
                 decoration: BoxDecoration(
-                  color: Colors.amber[50],
+                  color: Colors.green[50],
                   borderRadius: BorderRadius.circular(12),
-                  border: Border.all(color: Colors.amber[300]!),
+                  border: Border.all(color: Colors.green[300]!),
                 ),
-                child: Row(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Icon(Icons.info_outline, color: Colors.amber[900]),
-                    const SizedBox(width: 12),
-                    Expanded(
-                      child: Text(
-                        'More features coming soon!',
-                        style: TextStyle(
-                          color: Colors.amber[900],
-                          fontWeight: FontWeight.w500,
+                    Row(
+                      children: [
+                        Icon(Icons.emoji_events, color: Colors.green[700]),
+                        const SizedBox(width: 8),
+                        Text(
+                          'Recent Milestones',
+                          style: TextStyle(
+                            color: Colors.green[900],
+                            fontWeight: FontWeight.bold,
+                            fontSize: 16,
+                          ),
                         ),
-                      ),
+                      ],
                     ),
+                    const SizedBox(height: 12),
+                    _isLoadingMilestones
+                        ? const Center(
+                            child: Padding(
+                              padding: EdgeInsets.all(8.0),
+                              child: CircularProgressIndicator(),
+                            ),
+                          )
+                        : _recentMilestones.isEmpty
+                            ? Text(
+                                'Complete modules and assessments to earn milestones!',
+                                style: TextStyle(
+                                  color: Colors.green[700],
+                                  fontSize: 14,
+                                ),
+                              )
+                            : Column(
+                                children: _recentMilestones.map((milestone) {
+                                  return Padding(
+                                    padding: const EdgeInsets.only(bottom: 8),
+                                    child: Row(
+                                      children: [
+                                        Icon(
+                                          milestone['type'] == 'badge'
+                                              ? Icons.star
+                                              : Icons.check_circle,
+                                          color: Colors.green[600],
+                                          size: 20,
+                                        ),
+                                        const SizedBox(width: 8),
+                                        Expanded(
+                                          child: Text(
+                                            milestone['title'] ?? '',
+                                            style: TextStyle(
+                                              color: Colors.green[900],
+                                              fontSize: 14,
+                                            ),
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  );
+                                }).toList(),
+                              ),
                   ],
                 ),
               ),
