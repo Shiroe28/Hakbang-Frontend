@@ -1,8 +1,42 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import '../services/api_service.dart';
+import '../models/user_model.dart' as models;
 
-class BadgesScreen extends StatelessWidget {
+class BadgesScreen extends StatefulWidget {
   const BadgesScreen({super.key});
+
+  @override
+  State<BadgesScreen> createState() => _BadgesScreenState();
+}
+
+class _BadgesScreenState extends State<BadgesScreen> {
+  bool _isLoading = true;
+  List<models.Badge> _earnedBadges = [];
+  int _totalPoints = 0;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadBadges();
+  }
+
+  Future<void> _loadBadges() async {
+    setState(() => _isLoading = true);
+    try {
+      final data = await ApiService.fetchUserBadges();
+      setState(() {
+        _earnedBadges = (data['badges'] as List? ?? [])
+            .map((b) => models.Badge.fromJson(b))
+            .toList();
+        _totalPoints = data['totalPoints'] ?? 0;
+        _isLoading = false;
+      });
+    } catch (e) {
+      print('❌ Error loading badges: $e');
+      setState(() => _isLoading = false);
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -90,7 +124,7 @@ class BadgesScreen extends StatelessWidget {
                           context,
                           icon: Icons.stars,
                           title: 'Badges Earned',
-                          value: '0',
+                          value: _isLoading ? '...' : '${_earnedBadges.length}',
                           color: Colors.amber,
                         ),
                       ),
@@ -100,7 +134,7 @@ class BadgesScreen extends StatelessWidget {
                           context,
                           icon: Icons.trending_up,
                           title: 'Total Points',
-                          value: '0',
+                          value: _isLoading ? '...' : '$_totalPoints',
                           color: Colors.green,
                         ),
                       ),
@@ -119,8 +153,17 @@ class BadgesScreen extends StatelessWidget {
                   ),
                   const SizedBox(height: 12),
 
-                  // Empty state message
-                  Container(
+                  // Show loading or content
+                  if (_isLoading)
+                    const Center(
+                      child: Padding(
+                        padding: EdgeInsets.all(32.0),
+                        child: CircularProgressIndicator(),
+                      ),
+                    )
+                  else if (_earnedBadges.isEmpty)
+                    // Empty state message
+                    Container(
                     padding: const EdgeInsets.all(32),
                     decoration: BoxDecoration(
                       color: Colors.grey[100],
@@ -159,8 +202,43 @@ class BadgesScreen extends StatelessWidget {
 
                   const SizedBox(height: 24),
 
+                  // Show earned badges
+                  if (!_isLoading && _earnedBadges.isNotEmpty) ...[
+                    Text(
+                      'Earned Achievements (${_earnedBadges.length})',
+                      style: GoogleFonts.poppins(
+                        fontSize: 18,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.black87,
+                      ),
+                    ),
+                    const SizedBox(height: 12),
+                    GridView.builder(
+                      shrinkWrap: true,
+                      physics: const NeverScrollableScrollPhysics(),
+                      gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                        crossAxisCount: 3,
+                        mainAxisSpacing: 16,
+                        crossAxisSpacing: 16,
+                        childAspectRatio: 0.85,
+                      ),
+                      itemCount: _earnedBadges.length,
+                      itemBuilder: (context, index) {
+                        final badge = _earnedBadges[index];
+                        return _buildEarnedBadgeCard(
+                          icon: badge.icon,
+                          title: badge.title,
+                          description: badge.description,
+                          earnedAt: badge.earnedAt,
+                        );
+                      },
+                    ),
+                    const SizedBox(height: 24),
+                  ],
+
                   // Show all badges as locked
-                  GridView.count(
+                  if (!_isLoading)
+                    GridView.count(
                     crossAxisCount: 3,
                     shrinkWrap: true,
                     physics: const NeverScrollableScrollPhysics(),
@@ -381,6 +459,78 @@ class BadgesScreen extends StatelessWidget {
                 size: 16,
               ),
             ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildEarnedBadgeCard({
+    required String icon,
+    required String title,
+    required String description,
+    required DateTime earnedAt,
+  }) {
+    final daysSince = DateTime.now().difference(earnedAt).inDays;
+    final timeText = daysSince == 0 
+        ? 'Today' 
+        : daysSince == 1 
+            ? 'Yesterday' 
+            : '$daysSince days ago';
+
+    return Container(
+      decoration: BoxDecoration(
+        gradient: LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: [Colors.amber.shade300, Colors.orange.shade400],
+        ),
+        borderRadius: BorderRadius.circular(12),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.orange.withOpacity(0.3),
+            blurRadius: 8,
+            offset: const Offset(0, 4),
+          ),
+        ],
+      ),
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          // Badge icon with glow effect
+          Container(
+            padding: const EdgeInsets.all(8),
+            decoration: BoxDecoration(
+              color: Colors.white.withOpacity(0.3),
+              shape: BoxShape.circle,
+            ),
+            child: Text(
+              icon,
+              style: const TextStyle(fontSize: 36),
+            ),
+          ),
+          const SizedBox(height: 8),
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 4),
+            child: Text(
+              title,
+              textAlign: TextAlign.center,
+              style: const TextStyle(
+                fontSize: 11,
+                fontWeight: FontWeight.bold,
+                color: Colors.white,
+              ),
+              maxLines: 2,
+              overflow: TextOverflow.ellipsis,
+            ),
+          ),
+          const SizedBox(height: 4),
+          Text(
+            timeText,
+            style: TextStyle(
+              fontSize: 9,
+              color: Colors.white.withOpacity(0.8),
+            ),
+          ),
         ],
       ),
     );

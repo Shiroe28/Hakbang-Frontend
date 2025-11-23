@@ -160,7 +160,19 @@ class _ModuleAssessmentScreenState extends State<ModuleAssessmentScreen> {
       if ((results['percentage'] ?? 0) >= 70) {
         try {
           print('🎖️ Fetching updated badges after passing assessment...');
-          await ApiService.fetchUserBadges();
+          final badgeData = await ApiService.fetchUserBadges();
+          
+          // Check if new badge was earned
+          if (badgeData['newBadgeEarned'] == true && badgeData['badge'] != null) {
+            // Show achievement popup
+            if (mounted) {
+              _showAchievementDialog(
+                title: badgeData['badge']['title'] ?? 'Achievement Unlocked!',
+                description: badgeData['badge']['description'] ?? 'Great job!',
+                icon: badgeData['badge']['icon'] ?? '🏆',
+              );
+            }
+          }
         } catch (e) {
           print('⚠️ Could not fetch badges: $e');
         }
@@ -177,6 +189,133 @@ class _ModuleAssessmentScreenState extends State<ModuleAssessmentScreen> {
         );
       }
     }
+  }
+
+  void _showAchievementDialog({
+    required String title,
+    required String description,
+    required String icon,
+  }) {
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (BuildContext context) {
+        return Dialog(
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(20),
+          ),
+          child: Container(
+            padding: const EdgeInsets.all(32),
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+                colors: [Colors.amber.shade400, Colors.orange.shade600],
+              ),
+              borderRadius: BorderRadius.circular(20),
+            ),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                // Animated trophy icon
+                TweenAnimationBuilder(
+                  tween: Tween<double>(begin: 0, end: 1),
+                  duration: const Duration(milliseconds: 800),
+                  curve: Curves.elasticOut,
+                  builder: (context, double value, child) {
+                    return Transform.scale(
+                      scale: value,
+                      child: Text(
+                        icon,
+                        style: const TextStyle(fontSize: 80),
+                      ),
+                    );
+                  },
+                ),
+                const SizedBox(height: 16),
+                const Text(
+                  '🎉 Achievement Unlocked! 🎉',
+                  textAlign: TextAlign.center,
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontSize: 20,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                const SizedBox(height: 12),
+                Text(
+                  title,
+                  textAlign: TextAlign.center,
+                  style: const TextStyle(
+                    color: Colors.white,
+                    fontSize: 24,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                const SizedBox(height: 8),
+                Text(
+                  description,
+                  textAlign: TextAlign.center,
+                  style: TextStyle(
+                    color: Colors.white.withOpacity(0.9),
+                    fontSize: 16,
+                  ),
+                ),
+                const SizedBox(height: 24),
+                Row(
+                  children: [
+                    Expanded(
+                      child: ElevatedButton(
+                        onPressed: () {
+                          Navigator.pop(context);
+                        },
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Colors.white,
+                          foregroundColor: Colors.orange.shade700,
+                          padding: const EdgeInsets.symmetric(vertical: 12),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                        ),
+                        child: const Text(
+                          'Awesome!',
+                          style: TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                      ),
+                    ),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: OutlinedButton.icon(
+                        onPressed: () {
+                          Navigator.pop(context); // Close dialog
+                          Navigator.pop(context); // Close results
+                          Navigator.pop(context); // Close assessment
+                          // Navigate to badges screen
+                          Navigator.pushNamed(context, '/badges');
+                        },
+                        icon: const Icon(Icons.emoji_events),
+                        label: const Text('View All'),
+                        style: OutlinedButton.styleFrom(
+                          foregroundColor: Colors.white,
+                          side: const BorderSide(color: Colors.white, width: 2),
+                          padding: const EdgeInsets.symmetric(vertical: 12),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          ),
+        );
+      },
+    );
   }
 
   @override
