@@ -100,16 +100,10 @@ class _CommunityScreenState extends State<CommunityScreen> {
   }
 
   Color _getRoleBadgeColor(String? role) {
-    switch (role?.toLowerCase()) {
-      case 'mentor':
-        return Colors.purple;
-      case 'student':
-        return Colors.blue;
-      case 'admin':
-        return Colors.red;
-      default:
-        return Colors.grey;
+    if (role?.toLowerCase() == 'admin') {
+      return Colors.red;
     }
+    return Colors.blue; // Student (default)
   }
 
   Future<void> _showCreatePostDialog() async {

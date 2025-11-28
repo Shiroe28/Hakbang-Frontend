@@ -25,6 +25,14 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
   bool _isUploadingImage = false;
   final ImagePicker _picker = ImagePicker();
 
+  /// Get role display name (title case)
+  String _getRoleDisplayName(String? role) {
+    if (role?.toLowerCase() == 'admin') {
+      return 'Admin';
+    }
+    return 'Student'; // Default
+  }
+
   @override
   void initState() {
     super.initState();
@@ -394,7 +402,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                     ),
                     const SizedBox(width: 12),
                     Text(
-                      widget.user.role == 'student' ? 'Student' : 'Mentor',
+                      _getRoleDisplayName(widget.user.role),
                       style: TextStyle(
                         fontSize: 16,
                         color: Colors.grey[700],

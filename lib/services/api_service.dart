@@ -170,12 +170,28 @@ class ApiService {
       );
 
       if (response.statusCode == 200) {
-        final List<dynamic> data = jsonDecode(response.body);
+        final decoded = jsonDecode(response.body);
+        
+        // Handle both wrapped and plain array formats
+        List<dynamic> data;
+        if (decoded is Map<String, dynamic>) {
+          // New wrapped format: { success: true, data: [...], count: N }
+          data = decoded['data'] ?? [];
+          print('✅ Fetched ${data.length} careers (wrapped format)');
+        } else if (decoded is List) {
+          // Old plain array format: [...]
+          data = decoded;
+          print('✅ Fetched ${data.length} careers (array format)');
+        } else {
+          throw Exception('Unexpected response format: ${decoded.runtimeType}');
+        }
+        
         return data.map((json) => Career.fromJson(json)).toList();
       } else {
-        throw Exception('Failed to load careers');
+        throw Exception('Failed to load careers: ${response.statusCode}');
       }
     } catch (e) {
+      print('❌ Error fetching careers: $e');
       throw Exception('Error fetching careers: $e');
     }
   }

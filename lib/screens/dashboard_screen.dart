@@ -79,6 +79,38 @@ class _DashboardScreenState extends State<DashboardScreen> {
     );
   }
 
+  /// Get role badge background color
+  Color _getRoleBadgeColor(String? role) {
+    if (role?.toLowerCase() == 'admin') {
+      return Colors.red[100]!;
+    }
+    return Colors.blue[100]!; // Student (default)
+  }
+
+  /// Get role badge text color
+  Color _getRoleBadgeTextColor(String? role) {
+    if (role?.toLowerCase() == 'admin') {
+      return Colors.red[900]!;
+    }
+    return Colors.blue[900]!; // Student (default)
+  }
+
+  /// Get role badge display text (uppercase)
+  String _getRoleBadgeText(String? role) {
+    if (role?.toLowerCase() == 'admin') {
+      return 'ADMIN';
+    }
+    return 'STUDENT'; // Default
+  }
+
+  /// Get role info text for dashboard
+  String _getRoleInfoText(String? role) {
+    if (role?.toLowerCase() == 'admin') {
+      return 'You are logged in as an Admin.\nManage users and platform settings!';
+    }
+    return 'You are logged in as a Student.\nExplore IT careers and start learning!';
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -137,17 +169,13 @@ class _DashboardScreenState extends State<DashboardScreen> {
                           vertical: 8,
                         ),
                         decoration: BoxDecoration(
-                          color: widget.role == 'student'
-                              ? Colors.blue[100]
-                              : Colors.purple[100],
+                          color: _getRoleBadgeColor(widget.role),
                           borderRadius: BorderRadius.circular(20),
                         ),
                         child: Text(
-                          widget.role == 'student' ? 'STUDENT' : 'MENTOR',
+                          _getRoleBadgeText(widget.role),
                           style: TextStyle(
-                            color: widget.role == 'student'
-                                ? Colors.blue[900]
-                                : Colors.purple[900],
+                            color: _getRoleBadgeTextColor(widget.role),
                             fontWeight: FontWeight.bold,
                             fontSize: 16,
                           ),
@@ -197,9 +225,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
 
               // Info Text
               Text(
-                widget.role == 'student'
-                    ? 'You are logged in as a Student.\nExplore IT careers and start learning!'
-                    : 'You are logged in as a Mentor.\nHelp students achieve their goals!',
+                _getRoleInfoText(widget.role),
                 style: TextStyle(
                   fontSize: 16,
                   color: Colors.grey[700],

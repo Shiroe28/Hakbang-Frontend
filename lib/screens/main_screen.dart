@@ -189,6 +189,14 @@ class HomeTabScreen extends StatefulWidget {
 }
 
 class _HomeTabScreenState extends State<HomeTabScreen> {
+  /// Get role display name (title case)
+  String _getRoleDisplayName(String? role) {
+    if (role?.toLowerCase() == 'admin') {
+      return 'Admin';
+    }
+    return 'Student'; // Default
+  }
+
   @override
   Widget build(BuildContext context) {
     // Get user data from provider for profile picture
@@ -314,7 +322,7 @@ class _HomeTabScreenState extends State<HomeTabScreen> {
                                     borderRadius: BorderRadius.circular(12),
                                   ),
                                   child: Text(
-                                    widget.role == 'student' ? 'Student' : 'Mentor',
+                                    _getRoleDisplayName(widget.role),
                                     style: GoogleFonts.poppins(
                                       color: Colors.white,
                                       fontWeight: FontWeight.bold,

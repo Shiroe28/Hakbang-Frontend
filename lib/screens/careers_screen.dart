@@ -252,14 +252,22 @@ class _CareersScreenState extends State<CareersScreen> {
                       color: Colors.green[700],
                     ),
                     const SizedBox(width: 6),
+                    Flexible(
+                      child: Text(
+                        career.philippineSalary.entryLevel,
+                        style: TextStyle(
+                          color: Colors.green[700],
+                          fontWeight: FontWeight.w600,
+                          fontSize: 12,
+                        ),
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    ),
                     Text(
-                      career.salaryRange.isNotEmpty 
-                          ? career.salaryRange 
-                          : 'Salary not specified',
+                      ' (Entry)',
                       style: TextStyle(
-                        color: Colors.green[700],
-                        fontWeight: FontWeight.w600,
-                        fontSize: 13,
+                        color: Colors.green[600],
+                        fontSize: 10,
                       ),
                     ),
                   ],

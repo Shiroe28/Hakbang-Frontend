@@ -98,6 +98,38 @@ class _ProfileScreenState extends State<ProfileScreen> {
     }
   }
 
+  /// Get role badge background color
+  Color _getRoleBadgeColor(String? role) {
+    if (role?.toLowerCase() == 'admin') {
+      return Colors.red[100]!;
+    }
+    return Colors.blue[100]!; // Student (default)
+  }
+
+  /// Get role badge text color
+  Color _getRoleBadgeTextColor(String? role) {
+    if (role?.toLowerCase() == 'admin') {
+      return Colors.red[900]!;
+    }
+    return Colors.blue[900]!; // Student (default)
+  }
+
+  /// Get role badge display text (uppercase)
+  String _getRoleBadgeText(String? role) {
+    if (role?.toLowerCase() == 'admin') {
+      return 'ADMIN';
+    }
+    return 'STUDENT'; // Default
+  }
+
+  /// Get role display name (title case)
+  String _getRoleDisplayName(String? role) {
+    if (role?.toLowerCase() == 'admin') {
+      return 'Admin';
+    }
+    return 'Student'; // Default
+  }
+
   @override
   Widget build(BuildContext context) {
     if (_isLoading) {
@@ -194,17 +226,13 @@ class _ProfileScreenState extends State<ProfileScreen> {
                       vertical: 8,
                     ),
                     decoration: BoxDecoration(
-                      color: displayRole == 'student'
-                          ? Colors.blue[100]
-                          : Colors.purple[100],
+                      color: _getRoleBadgeColor(displayRole),
                       borderRadius: BorderRadius.circular(20),
                     ),
                     child: Text(
-                      displayRole == 'student' ? 'STUDENT' : 'MENTOR',
+                      _getRoleBadgeText(displayRole),
                       style: TextStyle(
-                        color: displayRole == 'student'
-                            ? Colors.blue[900]
-                            : Colors.purple[900],
+                        color: _getRoleBadgeTextColor(displayRole),
                         fontWeight: FontWeight.bold,
                         fontSize: 14,
                       ),
@@ -232,7 +260,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                         _buildInfoTile(
                           icon: Icons.badge_rounded,
                           title: 'Role',
-                          value: displayRole == 'student' ? 'Student' : 'Mentor',
+                          value: _getRoleDisplayName(displayRole),
                         ),
                       ],
                     ),
