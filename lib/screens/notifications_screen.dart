@@ -24,6 +24,21 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
     
     try {
       final notifications = await ApiService.fetchNotifications();
+      
+      // 🔍 Debug: Log all notification types received from backend
+      print('📋 Total notifications received: ${notifications.length}');
+      for (var notif in notifications) {
+        print('📌 Notification: type="${notif['type']}", title="${notif['title']}"');
+      }
+      
+      // Count by type for debugging
+      final typeCounts = <String, int>{};
+      for (var notif in notifications) {
+        final type = notif['type']?.toString() ?? 'unknown';
+        typeCounts[type] = (typeCounts[type] ?? 0) + 1;
+      }
+      print('📊 Notification types breakdown: $typeCounts');
+      
       setState(() {
         _notifications = notifications;
         _isLoading = false;
@@ -40,6 +55,8 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
         return Icons.emoji_events;
       case 'milestone':
         return Icons.star;
+      case 'motivation':
+        return Icons.auto_awesome;
       case 'system':
         return Icons.info;
       case 'update':
@@ -55,6 +72,8 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
         return Colors.amber;
       case 'milestone':
         return Colors.green;
+      case 'motivation':
+        return Colors.pink;
       case 'system':
         return Colors.blue;
       case 'update':
@@ -220,11 +239,29 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
                                 border: Border.all(
                                   color: isRead
                                       ? Colors.grey[300]!
-                                      : _getColorForType(type).withOpacity(0.3),
-                                  width: 1,
+                                      : _getColorForType(type).withOpacity(0.5),
+                                  width: isRead ? 1 : 2,
                                 ),
+                                boxShadow: isRead ? null : [
+                                  BoxShadow(
+                                    color: _getColorForType(type).withOpacity(0.2),
+                                    blurRadius: 8,
+                                    offset: const Offset(0, 2),
+                                  ),
+                                ],
                               ),
-                              child: ListTile(
+                              child: ClipRRect(
+                                borderRadius: BorderRadius.circular(12),
+                                child: Container(
+                                  decoration: BoxDecoration(
+                                    border: Border(
+                                      left: BorderSide(
+                                        color: _getColorForType(type),
+                                        width: 4,
+                                      ),
+                                    ),
+                                  ),
+                                  child: ListTile(
                                 contentPadding: const EdgeInsets.symmetric(
                                   horizontal: 16,
                                   vertical: 8,
@@ -277,14 +314,26 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
                                         color: Colors.grey[700],
                                         height: 1.4,
                                       ),
+                                      maxLines: 2,
+                                      overflow: TextOverflow.ellipsis,
                                     ),
                                     const SizedBox(height: 8),
-                                    Text(
-                                      _formatTime(time),
-                                      style: GoogleFonts.poppins(
-                                        fontSize: 12,
-                                        color: Colors.grey[500],
-                                      ),
+                                    Row(
+                                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                      children: [
+                                        Text(
+                                          _formatTime(time),
+                                          style: GoogleFonts.poppins(
+                                            fontSize: 12,
+                                            color: Colors.grey[500],
+                                          ),
+                                        ),
+                                        Icon(
+                                          Icons.chevron_right,
+                                          size: 18,
+                                          color: Colors.grey[400],
+                                        ),
+                                      ],
                                     ),
                                   ],
                                 ),
@@ -299,7 +348,12 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
                                   setState(() {
                                     notification['isRead'] = true;
                                   });
+                                  
+                                  // Show notification detail dialog
+                                  _showNotificationDetail(notification);
                                 },
+                              ),
+                                ),
                               ),
                             );
                           },
@@ -308,6 +362,143 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
           ),
         ],
       ),
+    );
+  }
+
+  void _showNotificationDetail(Map<String, dynamic> notification) {
+    final type = notification['type'] ?? 'system';
+    final title = notification['title'] ?? 'Notification';
+    final message = notification['message'] ?? '';
+    final createdAt = notification['createdAt'];
+    final time = createdAt != null ? DateTime.parse(createdAt) : DateTime.now();
+    
+    // Choose gradient colors based on type
+    List<Color> gradientColors;
+    switch (type) {
+      case 'motivation':
+        gradientColors = [Colors.pink.shade300, Colors.purple.shade400];
+        break;
+      case 'badge':
+        gradientColors = [Colors.amber.shade400, Colors.orange.shade500];
+        break;
+      case 'milestone':
+        gradientColors = [Colors.green.shade400, Colors.teal.shade500];
+        break;
+      default:
+        gradientColors = [Colors.blue.shade400, Colors.indigo.shade500];
+    }
+
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return Dialog(
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+          child: Container(
+            padding: const EdgeInsets.all(24),
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                colors: gradientColors,
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+              ),
+              borderRadius: BorderRadius.circular(20),
+            ),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                // Icon with animation
+                TweenAnimationBuilder(
+                  tween: Tween<double>(begin: 0, end: 1),
+                  duration: const Duration(milliseconds: 600),
+                  curve: Curves.elasticOut,
+                  builder: (context, double value, child) {
+                    return Transform.scale(
+                      scale: value,
+                      child: Container(
+                        padding: const EdgeInsets.all(16),
+                        decoration: BoxDecoration(
+                          color: Colors.white.withOpacity(0.2),
+                          shape: BoxShape.circle,
+                        ),
+                        child: Icon(
+                          _getIconForType(type),
+                          color: Colors.white,
+                          size: 48,
+                        ),
+                      ),
+                    );
+                  },
+                ),
+                const SizedBox(height: 20),
+                
+                // Title
+                Text(
+                  title,
+                  style: GoogleFonts.poppins(
+                    color: Colors.white,
+                    fontSize: 20,
+                    fontWeight: FontWeight.bold,
+                  ),
+                  textAlign: TextAlign.center,
+                ),
+                const SizedBox(height: 16),
+                
+                // Message
+                Container(
+                  padding: const EdgeInsets.all(16),
+                  decoration: BoxDecoration(
+                    color: Colors.white.withOpacity(0.15),
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: Text(
+                    message,
+                    style: GoogleFonts.poppins(
+                      color: Colors.white.withOpacity(0.95),
+                      fontSize: 15,
+                      height: 1.5,
+                    ),
+                    textAlign: TextAlign.center,
+                  ),
+                ),
+                const SizedBox(height: 12),
+                
+                // Timestamp
+                Text(
+                  _formatTime(time),
+                  style: GoogleFonts.poppins(
+                    color: Colors.white.withOpacity(0.7),
+                    fontSize: 12,
+                  ),
+                ),
+                const SizedBox(height: 20),
+                
+                // Close button
+                SizedBox(
+                  width: double.infinity,
+                  child: ElevatedButton(
+                    onPressed: () => Navigator.pop(context),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.white,
+                      foregroundColor: gradientColors[0],
+                      padding: const EdgeInsets.symmetric(vertical: 12),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                    ),
+                    child: Text(
+                      type == 'motivation' ? 'Thank you! 💪' : 'Got it!',
+                      style: GoogleFonts.poppins(
+                        fontSize: 16,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        );
+      },
     );
   }
 }

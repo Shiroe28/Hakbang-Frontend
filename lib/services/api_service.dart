@@ -1211,6 +1211,82 @@ class ApiService {
     }
   }
 
+  /// Generate AI motivational reflection for milestone achievement
+  /// This sends a request to the backend to generate a personalized
+  /// encouraging message and store it as a notification
+  /// Returns the generated message if successful (for optional popup display)
+  static Future<String?> generateMotivationalReflection({
+    required String milestoneType, // 'module_completed', 'quiz_passed', 'badge_earned', 'streak_achieved'
+    required String milestoneName,
+    Map<String, dynamic>? additionalContext,
+  }) async {
+    try {
+      print('🌟 Requesting AI motivational reflection...');
+      print('   Milestone Type: $milestoneType');
+      print('   Milestone Name: $milestoneName');
+      
+      final response = await http.post(
+        Uri.parse('$baseUrl/ai/motivational-reflection'),
+        headers: await _getHeaders(needsAuth: true),
+        body: jsonEncode({
+          'milestoneType': milestoneType,
+          'milestoneName': milestoneName,
+          'additionalContext': additionalContext ?? {},
+        }),
+      );
+
+      print('📥 Motivational reflection response: ${response.statusCode}');
+      print('📦 Response body: ${response.body}');
+      
+      if (response.statusCode == 200 || response.statusCode == 201) {
+        final decoded = jsonDecode(response.body);
+        print('📦 Decoded response: $decoded');
+        
+        if (decoded['success'] == true) {
+          print('✅ Motivational reflection generated and saved as notification');
+          
+          // Try multiple response formats
+          String? message;
+          
+          // Format 1: { data: { notification: { message: "..." } } }
+          if (decoded['data'] != null) {
+            final data = decoded['data'];
+            if (data['notification'] != null) {
+              message = data['notification']['message'] as String?;
+            }
+            // Format 2: { data: { message: "..." } }
+            else if (data['message'] != null) {
+              message = data['message'] as String?;
+            }
+          }
+          // Format 3: { message: "..." } (direct message)
+          else if (decoded['message'] != null && decoded['message'] is String) {
+            // Make sure it's not just "Success" type message
+            final msg = decoded['message'] as String;
+            if (msg.length > 30) { // AI messages are usually longer
+              message = msg;
+            }
+          }
+          // Format 4: { reflection: "..." }
+          else if (decoded['reflection'] != null) {
+            message = decoded['reflection'] as String?;
+          }
+          
+          print('🎯 Extracted message: $message');
+          return message;
+        } else {
+          print('⚠️ Backend returned success=false: ${decoded['message']}');
+        }
+      } else {
+        print('⚠️ Failed to generate motivational reflection: ${response.statusCode}');
+        print('⚠️ Response body: ${response.body}');
+      }
+    } catch (e) {
+      print('⚠️ Error generating motivational reflection: $e');
+    }
+    return null; // Return null on failure (non-critical)
+  }
+
   /// Fetch user progress for a specific career
   static Future<Map<String, dynamic>> fetchUserProgress(String careerId) async {
     try {

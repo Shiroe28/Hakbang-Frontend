@@ -179,6 +179,17 @@ class _ModuleAssessmentScreenState extends State<ModuleAssessmentScreen> {
                 message: '${badge['icon']} ${badge['title']} - ${badge['description']}',
                 type: 'badge',
               );
+              
+              // 🌟 Generate AI motivational reflection for badge earned (runs in background)
+              ApiService.generateMotivationalReflection(
+                milestoneType: 'badge_earned',
+                milestoneName: badge['title'] ?? 'Achievement',
+                additionalContext: {
+                  'badgeIcon': badge['icon'],
+                  'badgeDescription': badge['description'],
+                  'earnedFrom': 'assessment',
+                },
+              );
             }
           }
           
@@ -189,6 +200,55 @@ class _ModuleAssessmentScreenState extends State<ModuleAssessmentScreen> {
               message: 'Congratulations! You scored ${results['percentage']}% on the assessment',
               type: 'milestone',
             );
+            
+            // 🌟 Generate AI motivational reflection for quiz passed and show popup
+            final motivationalMessage = await ApiService.generateMotivationalReflection(
+              milestoneType: 'quiz_passed',
+              milestoneName: _assessment!.title,
+              additionalContext: {
+                'moduleId': widget.moduleId,
+                'careerId': widget.careerId,
+                'score': results['percentage'],
+              },
+            );
+            
+            // Show motivational popup if message was generated
+            if (motivationalMessage != null && mounted) {
+              // 🔄 Fallback: Create motivation notification from frontend
+              // (in case backend doesn't create it automatically)
+              await ApiService.createNotification(
+                title: '✨ Smart Reflection',
+                message: motivationalMessage,
+                type: 'motivation',
+              );
+              
+              // First show a quick SnackBar notification
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(
+                  content: Row(
+                    children: [
+                      const Text('✨', style: TextStyle(fontSize: 20)),
+                      const SizedBox(width: 8),
+                      const Expanded(child: Text('You have a new motivational message!')),
+                    ],
+                  ),
+                  backgroundColor: Colors.pink.shade400,
+                  duration: const Duration(seconds: 3),
+                  action: SnackBarAction(
+                    label: 'View',
+                    textColor: Colors.white,
+                    onPressed: () => _showMotivationalPopup(motivationalMessage),
+                  ),
+                ),
+              );
+              
+              // Then show the full dialog after a short delay
+              Future.delayed(const Duration(milliseconds: 500), () {
+                if (mounted) {
+                  _showMotivationalPopup(motivationalMessage);
+                }
+              });
+            }
           }
         } catch (e) {
           print('⚠️ Could not fetch badges: $e');
@@ -326,6 +386,91 @@ class _ModuleAssessmentScreenState extends State<ModuleAssessmentScreen> {
                       ),
                     ),
                   ],
+                ),
+              ],
+            ),
+          ),
+        );
+      },
+    );
+  }
+
+  void _showMotivationalPopup(String message) {
+    showDialog(
+      context: context,
+      barrierDismissible: true,
+      builder: (BuildContext context) {
+        return Dialog(
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+          child: Container(
+            padding: const EdgeInsets.all(24),
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                colors: [Colors.pink.shade300, Colors.purple.shade400],
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+              ),
+              borderRadius: BorderRadius.circular(20),
+            ),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                // Sparkle icon with animation
+                TweenAnimationBuilder(
+                  tween: Tween<double>(begin: 0, end: 1),
+                  duration: const Duration(milliseconds: 600),
+                  curve: Curves.elasticOut,
+                  builder: (context, double value, child) {
+                    return Transform.scale(
+                      scale: value,
+                      child: const Text(
+                        '✨',
+                        style: TextStyle(fontSize: 60),
+                      ),
+                    );
+                  },
+                ),
+                const SizedBox(height: 16),
+                const Text(
+                  'Words of Encouragement',
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
+                  ),
+                  textAlign: TextAlign.center,
+                ),
+                const SizedBox(height: 16),
+                Text(
+                  message,
+                  style: TextStyle(
+                    color: Colors.white.withOpacity(0.95),
+                    fontSize: 16,
+                    height: 1.5,
+                  ),
+                  textAlign: TextAlign.center,
+                ),
+                const SizedBox(height: 24),
+                SizedBox(
+                  width: double.infinity,
+                  child: ElevatedButton(
+                    onPressed: () => Navigator.pop(context),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.white,
+                      foregroundColor: Colors.pink.shade400,
+                      padding: const EdgeInsets.symmetric(vertical: 12),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                    ),
+                    child: const Text(
+                      'Thank you! 💪',
+                      style: TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ),
                 ),
               ],
             ),
