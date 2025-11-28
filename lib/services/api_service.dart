@@ -803,54 +803,71 @@ class ApiService {
 
       if (response.statusCode == 200) {
         final decoded = jsonDecode(response.body);
-        print('📦 Raw response: $decoded');
         
         // Backend returns: { success: true, data: [...posts...], pagination: {...} }
         if (decoded is Map && decoded.containsKey('data')) {
           final List<dynamic> posts = decoded['data'];
           print('✅ Found ${posts.length} community posts');
           
-          // Normalize posts with authorName, authorRole, profilePicture
+          // Return posts with full data including author object
           return posts.map<Map<String, dynamic>>((p) {
-            // Extract authorId - handle both String and Map formats
+            // Get author data from 'author' object (populated) or 'authorId' if it's populated
+            final author = p['author'] as Map<String, dynamic>?;
+            final authorIdPopulated = p['authorId'] is Map ? p['authorId'] as Map<String, dynamic> : null;
+            final authorData = author ?? authorIdPopulated;
+            
+            // Extract authorId string
             String authorIdStr;
             if (p['authorId'] is String) {
               authorIdStr = p['authorId'];
             } else if (p['authorId'] is Map) {
-              authorIdStr = p['authorId']['_id'] ?? '';
+              authorIdStr = p['authorId']['_id']?.toString() ?? '';
+            } else if (author != null) {
+              authorIdStr = author['_id']?.toString() ?? '';
             } else {
               authorIdStr = '';
             }
+            
+            print('📄 Post "${p['title']}": author=$authorData, authorId=$authorIdStr');
             
             return {
               '_id': p['_id'] ?? '',
               'title': p['title'] ?? '',
               'content': p['content'] ?? '',
-              'authorId': authorIdStr,
-              'authorName': p['authorName'] ?? (p['authorId'] is Map ? (p['authorId']['name'] ?? 'Unknown') : 'Unknown'),
-              'authorRole': p['authorRole'] ?? (p['authorId'] is Map ? (p['authorId']['role'] ?? 'student') : 'student'),
-              'profilePicture': p['authorPicture'] ?? p['profilePicture'] ?? (p['authorId'] is Map ? p['authorId']['profilePicture'] : null),
               'category': p['category'] ?? 'general',
+              'authorId': authorIdStr,
+              // Pass the full author object so Post.fromJson can extract it
+              'author': authorData,
+              // Also include flattened fields as fallback
+              'authorName': p['authorName'] ?? authorData?['name'] ?? authorData?['username'] ?? 'Anonymous',
+              'authorRole': p['authorRole'] ?? authorData?['role'] ?? 'student',
+              'profilePicture': p['profilePicture'] ?? authorData?['profilePicture'],
               'createdAt': p['createdAt'] ?? '',
-              'likes': p['likes'] ?? 0,
-              'commentCount': p['commentCount'] ?? (p['comments']?.length ?? 0),
+              'likedBy': p['likedBy'] ?? [],
+              'likeCount': p['likeCount'] ?? p['likes'] ?? 0,
+              'comments': p['comments'] ?? [],
+              'commentCount': p['commentCount'] ?? (p['comments'] is List ? (p['comments'] as List).length : 0),
             };
           }).toList();
         } else if (decoded is List) {
           // Direct array format (fallback)
           print('✅ Found ${decoded.length} community posts (direct array)');
           return decoded.map<Map<String, dynamic>>((p) {
+            final author = p['author'] as Map<String, dynamic>?;
             return {
               '_id': p['_id'],
               'title': p['title'],
               'content': p['content'],
-              'authorId': p['authorId'],
-              'authorName': p['authorName'] ?? 'Unknown',
-              'authorRole': p['authorRole'] ?? 'student',
-              'profilePicture': p['profilePicture'],
               'category': p['category'] ?? 'general',
+              'authorId': p['authorId']?.toString() ?? author?['_id']?.toString() ?? '',
+              'author': author,
+              'authorName': p['authorName'] ?? author?['name'] ?? author?['username'] ?? 'Anonymous',
+              'authorRole': p['authorRole'] ?? author?['role'] ?? 'student',
+              'profilePicture': p['profilePicture'] ?? author?['profilePicture'],
               'createdAt': p['createdAt'],
-              'likes': p['likes'] ?? 0,
+              'likedBy': p['likedBy'] ?? [],
+              'likeCount': p['likeCount'] ?? p['likes'] ?? 0,
+              'comments': p['comments'] ?? [],
               'commentCount': p['commentCount'] ?? 0,
             };
           }).toList();

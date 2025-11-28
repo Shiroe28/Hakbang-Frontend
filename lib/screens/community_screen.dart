@@ -50,8 +50,15 @@ class _CommunityScreenState extends State<CommunityScreen> {
       print('📦 CommunityScreen: Received ${postsData.length} posts');
 
       final posts = postsData.map((json) {
-        print('📄 Post data: ${json['_id']} - ${json['title']}');
-        return Post.fromJson(json);
+        // Debug: Print author data to see what we're receiving
+        print('📄 Post: ${json['_id']} - "${json['title']}"');
+        print('   👤 author object: ${json['author']}');
+        print('   👤 authorId: ${json['authorId']}');
+        print('   👤 authorName (direct): ${json['authorName']}');
+        
+        final post = Post.fromJson(json);
+        print('   ✅ Parsed authorName: ${post.authorName}');
+        return post;
       }).toList();
 
       setState(() {
@@ -221,18 +228,63 @@ class _CommunityScreenState extends State<CommunityScreen> {
 
   /// Toggle like on a post
   Future<void> _toggleLike(Post post) async {
+    if (_currentUserId == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Please log in to like posts', style: GoogleFonts.poppins()),
+          backgroundColor: Colors.orange,
+        ),
+      );
+      return;
+    }
+
+    // Optimistic UI update
+    final wasLiked = post.isLikedBy(_currentUserId!);
+    final postIndex = _posts.indexWhere((p) => p.id == post.id);
+    
+    if (postIndex != -1) {
+      setState(() {
+        final updatedLikedBy = List<String>.from(post.likedBy);
+        if (wasLiked) {
+          updatedLikedBy.remove(_currentUserId);
+        } else {
+          updatedLikedBy.add(_currentUserId!);
+        }
+        _posts[postIndex] = post.copyWith(
+          likes: wasLiked ? post.likes - 1 : post.likes + 1,
+          likedBy: updatedLikedBy,
+        );
+      });
+    }
+
     try {
       await ApiService.toggleLikePost(post.id);
-      _loadPosts(); // Refresh to get updated like count
+      // Optionally refresh to sync with server
+      // _loadPosts();
     } catch (e) {
-      if (mounted) {
+      // Revert optimistic update on error
+      if (postIndex != -1 && mounted) {
+        setState(() {
+          final revertedLikedBy = List<String>.from(_posts[postIndex].likedBy);
+          if (wasLiked) {
+            revertedLikedBy.add(_currentUserId!);
+          } else {
+            revertedLikedBy.remove(_currentUserId);
+          }
+          _posts[postIndex] = _posts[postIndex].copyWith(
+            likes: wasLiked ? _posts[postIndex].likes + 1 : _posts[postIndex].likes - 1,
+            likedBy: revertedLikedBy,
+          );
+        });
+        
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Failed to like post: $e', style: GoogleFonts.poppins()),
+            content: Text('Failed to like post. Please try again.', style: GoogleFonts.poppins()),
             backgroundColor: Colors.red,
           ),
         );
       }
+      debugPrint('Like error: $e');
     }
   }
 
@@ -439,14 +491,22 @@ class _CommunityScreenState extends State<CommunityScreen> {
           CircleAvatar(
             radius: 16,
             backgroundColor: Colors.blue.withOpacity(0.2),
-            child: Text(
-              comment.userName[0].toUpperCase(),
-              style: GoogleFonts.poppins(
-                color: Colors.blue,
-                fontWeight: FontWeight.bold,
-                fontSize: 12,
-              ),
-            ),
+            backgroundImage: comment.profilePicture != null &&
+                    comment.profilePicture!.isNotEmpty
+                ? NetworkImage(
+                    '${NetworkConfig.baseUrlWithoutApi}${comment.profilePicture}')
+                : null,
+            child: comment.profilePicture == null ||
+                    comment.profilePicture!.isEmpty
+                ? Text(
+                    comment.userName.isNotEmpty ? comment.userName[0].toUpperCase() : '?',
+                    style: GoogleFonts.poppins(
+                      color: Colors.blue,
+                      fontWeight: FontWeight.bold,
+                      fontSize: 12,
+                    ),
+                  )
+                : null,
           ),
           const SizedBox(width: 12),
           Expanded(
