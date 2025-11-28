@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:url_launcher/url_launcher.dart';
 import '../models/post_model.dart';
 import '../services/api_service.dart';
+import '../services/storage_service.dart';
 import '../config/network_config.dart';
 
 class CommunityScreen extends StatefulWidget {
@@ -15,11 +17,25 @@ class _CommunityScreenState extends State<CommunityScreen> {
   List<Post> _posts = [];
   bool _isLoading = true;
   String? _errorMessage;
+  String? _currentUserId;
+
+  // Discord community link - replace with your actual Discord invite
+  static const String _discordInviteUrl = 'https://discord.gg/programming';
 
   @override
   void initState() {
     super.initState();
+    _loadCurrentUser();
     _loadPosts();
+  }
+
+  Future<void> _loadCurrentUser() async {
+    final userId = await StorageService.getUserId();
+    if (mounted) {
+      setState(() {
+        _currentUserId = userId;
+      });
+    }
   }
 
   Future<void> _loadPosts() async {
@@ -203,152 +219,518 @@ class _CommunityScreenState extends State<CommunityScreen> {
     contentController.dispose();
   }
 
+  /// Toggle like on a post
+  Future<void> _toggleLike(Post post) async {
+    try {
+      await ApiService.toggleLikePost(post.id);
+      _loadPosts(); // Refresh to get updated like count
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Failed to like post: $e', style: GoogleFonts.poppins()),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+    }
+  }
+
+  /// Show comments dialog
+  Future<void> _showCommentsDialog(Post post) async {
+    final commentController = TextEditingController();
+    bool isSubmitting = false;
+    bool isLoadingComments = true;
+    List<Comment> loadedComments = List.from(post.commentsList);
+
+    await showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (context) => StatefulBuilder(
+        builder: (context, setModalState) {
+          // Load comments from API when dialog opens
+          if (isLoadingComments) {
+            ApiService.getPostComments(post.id).then((comments) {
+              setModalState(() {
+                loadedComments = comments;
+                isLoadingComments = false;
+              });
+            }).catchError((e) {
+              setModalState(() {
+                isLoadingComments = false;
+              });
+              debugPrint('Failed to load comments: $e');
+            });
+          }
+
+          return Container(
+            height: MediaQuery.of(context).size.height * 0.75,
+            decoration: const BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.only(
+                topLeft: Radius.circular(20),
+                topRight: Radius.circular(20),
+              ),
+            ),
+            child: Column(
+              children: [
+                // Handle bar
+                Container(
+                  margin: const EdgeInsets.only(top: 12),
+                  width: 40,
+                  height: 4,
+                  decoration: BoxDecoration(
+                    color: Colors.grey[300],
+                    borderRadius: BorderRadius.circular(2),
+                  ),
+                ),
+                // Title
+                Padding(
+                  padding: const EdgeInsets.all(16),
+                  child: Row(
+                    children: [
+                      Text(
+                        'Comments (${loadedComments.length})',
+                        style: GoogleFonts.poppins(
+                          fontSize: 18,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      const Spacer(),
+                      IconButton(
+                        icon: const Icon(Icons.close),
+                        onPressed: () => Navigator.pop(context),
+                      ),
+                    ],
+                  ),
+                ),
+                const Divider(height: 1),
+                // Comments list
+                Expanded(
+                  child: isLoadingComments
+                      ? const Center(child: CircularProgressIndicator())
+                      : loadedComments.isEmpty
+                          ? Center(
+                              child: Column(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  Icon(Icons.chat_bubble_outline, size: 48, color: Colors.grey[400]),
+                                  const SizedBox(height: 8),
+                                  Text(
+                                    'No comments yet',
+                                    style: GoogleFonts.poppins(color: Colors.grey[600]),
+                                  ),
+                                  Text(
+                                    'Be the first to comment!',
+                                    style: GoogleFonts.poppins(color: Colors.grey[400], fontSize: 12),
+                                  ),
+                                ],
+                              ),
+                            )
+                          : ListView.builder(
+                              padding: const EdgeInsets.all(16),
+                              itemCount: loadedComments.length,
+                              itemBuilder: (context, index) {
+                                final comment = loadedComments[index];
+                                return _buildCommentItem(comment);
+                              },
+                            ),
+                ),
+              // Add comment input
+              Container(
+                padding: EdgeInsets.only(
+                  left: 16,
+                  right: 16,
+                  bottom: MediaQuery.of(context).viewInsets.bottom + 16,
+                  top: 8,
+                ),
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withOpacity(0.05),
+                      blurRadius: 10,
+                      offset: const Offset(0, -5),
+                    ),
+                  ],
+                ),
+                child: Row(
+                  children: [
+                    Expanded(
+                      child: TextField(
+                        controller: commentController,
+                        style: GoogleFonts.poppins(),
+                        decoration: InputDecoration(
+                          hintText: 'Write a comment...',
+                          hintStyle: GoogleFonts.poppins(color: Colors.grey),
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(24),
+                            borderSide: BorderSide(color: Colors.grey[300]!),
+                          ),
+                          contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                        ),
+                        maxLines: 2,
+                        minLines: 1,
+                      ),
+                    ),
+                    const SizedBox(width: 8),
+                    IconButton(
+                      onPressed: isSubmitting
+                          ? null
+                          : () async {
+                              if (commentController.text.trim().isEmpty) return;
+                              
+                              setModalState(() => isSubmitting = true);
+                              
+                              try {
+                                await ApiService.addCommentToPost(
+                                  postId: post.id,
+                                  text: commentController.text.trim(),
+                                );
+                                commentController.clear();
+                                Navigator.pop(context);
+                                _loadPosts(); // Refresh posts
+                                if (mounted) {
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    SnackBar(
+                                      content: Text('Comment added!', style: GoogleFonts.poppins()),
+                                      backgroundColor: Colors.green,
+                                    ),
+                                  );
+                                }
+                              } catch (e) {
+                                setModalState(() => isSubmitting = false);
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  SnackBar(
+                                    content: Text('Failed to add comment', style: GoogleFonts.poppins()),
+                                    backgroundColor: Colors.red,
+                                  ),
+                                );
+                              }
+                            },
+                      icon: isSubmitting
+                          ? const SizedBox(
+                              width: 20,
+                              height: 20,
+                              child: CircularProgressIndicator(strokeWidth: 2),
+                            )
+                          : Icon(Icons.send, color: Theme.of(context).primaryColor),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+        );
+        },
+      ),
+    );
+
+    commentController.dispose();
+  }
+
+  Widget _buildCommentItem(Comment comment) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 16),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          CircleAvatar(
+            radius: 16,
+            backgroundColor: Colors.blue.withOpacity(0.2),
+            child: Text(
+              comment.userName[0].toUpperCase(),
+              style: GoogleFonts.poppins(
+                color: Colors.blue,
+                fontWeight: FontWeight.bold,
+                fontSize: 12,
+              ),
+            ),
+          ),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  children: [
+                    Text(
+                      comment.userName,
+                      style: GoogleFonts.poppins(
+                        fontWeight: FontWeight.bold,
+                        fontSize: 13,
+                      ),
+                    ),
+                    const SizedBox(width: 8),
+                    Text(
+                      _formatDate(comment.createdAt),
+                      style: GoogleFonts.poppins(
+                        color: Colors.grey[500],
+                        fontSize: 11,
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  comment.text,
+                  style: GoogleFonts.poppins(fontSize: 13),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  /// Delete a post (only for post owner)
+  Future<void> _deletePost(Post post) async {
+    final confirm = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Text('Delete Post', style: GoogleFonts.poppins(fontWeight: FontWeight.bold)),
+        content: Text(
+          'Are you sure you want to delete this post? This action cannot be undone.',
+          style: GoogleFonts.poppins(),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context, false),
+            child: Text('Cancel', style: GoogleFonts.poppins()),
+          ),
+          ElevatedButton(
+            onPressed: () => Navigator.pop(context, true),
+            style: ElevatedButton.styleFrom(backgroundColor: Colors.red),
+            child: Text('Delete', style: GoogleFonts.poppins(color: Colors.white)),
+          ),
+        ],
+      ),
+    );
+
+    if (confirm == true) {
+      try {
+        await ApiService.deletePost(post.id);
+        _loadPosts();
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text('Post deleted', style: GoogleFonts.poppins()),
+              backgroundColor: Colors.green,
+            ),
+          );
+        }
+      } catch (e) {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text('Failed to delete post', style: GoogleFonts.poppins()),
+              backgroundColor: Colors.red,
+            ),
+          );
+        }
+      }
+    }
+  }
+
+  /// Open Discord community
+  Future<void> _openDiscord() async {
+    final uri = Uri.parse(_discordInviteUrl);
+    if (await canLaunchUrl(uri)) {
+      await launchUrl(uri, mode: LaunchMode.externalApplication);
+    } else {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Could not open Discord', style: GoogleFonts.poppins()),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+    }
+  }
+
   Widget _buildPostCard(Post post) {
+    final isOwner = _currentUserId != null && post.authorId == _currentUserId;
+    final isLiked = _currentUserId != null && post.isLikedBy(_currentUserId!);
+
     return Card(
       margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
       elevation: 2,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(12),
       ),
-      child: InkWell(
-        borderRadius: BorderRadius.circular(12),
-        onTap: () {
-          // TODO: Navigate to post detail screen
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text('Post details coming soon!',
-                  style: GoogleFonts.poppins()),
-              duration: const Duration(seconds: 1),
-            ),
-          );
-        },
-        child: Padding(
-          padding: const EdgeInsets.all(16),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              // Author info
-              Row(
-                children: [
-                  CircleAvatar(
-                    radius: 20,
-                    backgroundColor: Colors.blue.withValues(alpha: 0.2),
-                    backgroundImage: post.profilePicture != null &&
-                            post.profilePicture!.isNotEmpty
-                        ? NetworkImage(
-                            '${NetworkConfig.baseUrlWithoutApi}${post.profilePicture}')
-                        : null,
-                    child: post.profilePicture == null ||
-                            post.profilePicture!.isEmpty
-                        ? Text(
-                            post.authorName[0].toUpperCase(),
-                            style: GoogleFonts.poppins(
-                              color: Colors.blue,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          )
-                        : null,
-                  ),
-                  const SizedBox(width: 12),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Row(
-                          children: [
-                            Text(
-                              post.authorName,
-                              style: GoogleFonts.poppins(
-                                fontWeight: FontWeight.bold,
-                                fontSize: 16,
-                              ),
-                            ),
-                            if (post.authorRole != null) ...[
-                              const SizedBox(width: 8),
-                              Container(
-                                padding: const EdgeInsets.symmetric(
-                                  horizontal: 8,
-                                  vertical: 2,
-                                ),
-                                decoration: BoxDecoration(
-                                  color: _getRoleBadgeColor(post.authorRole),
-                                  borderRadius: BorderRadius.circular(12),
-                                ),
-                                child: Text(
-                                  post.authorRole!.toUpperCase(),
-                                  style: GoogleFonts.poppins(
-                                    color: Colors.white,
-                                    fontSize: 10,
-                                    fontWeight: FontWeight.bold,
-                                  ),
-                                ),
-                              ),
-                            ],
-                          ],
-                        ),
-                        const SizedBox(height: 4),
-                        Text(
-                          _formatDate(post.createdAt),
+      child: Padding(
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            // Author info row
+            Row(
+              children: [
+                CircleAvatar(
+                  radius: 20,
+                  backgroundColor: Colors.blue.withOpacity(0.2),
+                  backgroundImage: post.profilePicture != null &&
+                          post.profilePicture!.isNotEmpty
+                      ? NetworkImage(
+                          '${NetworkConfig.baseUrlWithoutApi}${post.profilePicture}')
+                      : null,
+                  child: post.profilePicture == null ||
+                          post.profilePicture!.isEmpty
+                      ? Text(
+                          post.authorName[0].toUpperCase(),
                           style: GoogleFonts.poppins(
-                            color: Colors.grey[600],
-                            fontSize: 12,
+                            color: Colors.blue,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        )
+                      : null,
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Row(
+                        children: [
+                          Text(
+                            post.authorName,
+                            style: GoogleFonts.poppins(
+                              fontWeight: FontWeight.bold,
+                              fontSize: 16,
+                            ),
+                          ),
+                          if (post.authorRole != null) ...[
+                            const SizedBox(width: 8),
+                            Container(
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 8,
+                                vertical: 2,
+                              ),
+                              decoration: BoxDecoration(
+                                color: _getRoleBadgeColor(post.authorRole),
+                                borderRadius: BorderRadius.circular(12),
+                              ),
+                              child: Text(
+                                post.authorRole!.toUpperCase(),
+                                style: GoogleFonts.poppins(
+                                  color: Colors.white,
+                                  fontSize: 10,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                            ),
+                          ],
+                        ],
+                      ),
+                      const SizedBox(height: 4),
+                      Text(
+                        _formatDate(post.createdAt),
+                        style: GoogleFonts.poppins(
+                          color: Colors.grey[600],
+                          fontSize: 12,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                // Delete button (only for post owner)
+                if (isOwner)
+                  IconButton(
+                    icon: Icon(Icons.delete_outline, color: Colors.red[400]),
+                    onPressed: () => _deletePost(post),
+                    tooltip: 'Delete post',
+                  ),
+              ],
+            ),
+            const SizedBox(height: 12),
+            // Post title
+            Text(
+              post.title,
+              style: GoogleFonts.poppins(
+                fontSize: 18,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+            const SizedBox(height: 8),
+            // Post content preview
+            Text(
+              post.content,
+              maxLines: 3,
+              overflow: TextOverflow.ellipsis,
+              style: GoogleFonts.poppins(
+                color: Colors.grey[800],
+                fontSize: 14,
+                height: 1.4,
+              ),
+            ),
+            const SizedBox(height: 16),
+            // Action buttons (Like & Comment)
+            Row(
+              children: [
+                // Like button
+                InkWell(
+                  onTap: () => _toggleLike(post),
+                  borderRadius: BorderRadius.circular(20),
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                    decoration: BoxDecoration(
+                      color: isLiked ? Colors.red.withOpacity(0.1) : Colors.grey[100],
+                      borderRadius: BorderRadius.circular(20),
+                    ),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Icon(
+                          isLiked ? Icons.favorite : Icons.favorite_border,
+                          size: 20,
+                          color: isLiked ? Colors.red : Colors.grey[600],
+                        ),
+                        const SizedBox(width: 6),
+                        Text(
+                          '${post.likes}',
+                          style: GoogleFonts.poppins(
+                            color: isLiked ? Colors.red : Colors.grey[600],
+                            fontWeight: isLiked ? FontWeight.bold : FontWeight.normal,
                           ),
                         ),
                       ],
                     ),
                   ),
-                ],
-              ),
-              const SizedBox(height: 12),
-              // Post title
-              Text(
-                post.title,
-                style: GoogleFonts.poppins(
-                  fontSize: 18,
-                  fontWeight: FontWeight.bold,
                 ),
-              ),
-              const SizedBox(height: 8),
-              // Post content preview
-              Text(
-                post.content,
-                maxLines: 3,
-                overflow: TextOverflow.ellipsis,
-                style: GoogleFonts.poppins(
-                  color: Colors.grey[800],
-                  fontSize: 14,
-                  height: 1.4,
+                const SizedBox(width: 12),
+                // Comment button
+                InkWell(
+                  onTap: () => _showCommentsDialog(post),
+                  borderRadius: BorderRadius.circular(20),
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                    decoration: BoxDecoration(
+                      color: Colors.grey[100],
+                      borderRadius: BorderRadius.circular(20),
+                    ),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Icon(
+                          Icons.chat_bubble_outline,
+                          size: 20,
+                          color: Colors.grey[600],
+                        ),
+                        const SizedBox(width: 6),
+                        Text(
+                          '${post.comments}',
+                          style: GoogleFonts.poppins(color: Colors.grey[600]),
+                        ),
+                      ],
+                    ),
+                  ),
                 ),
-              ),
-              const SizedBox(height: 12),
-              // Post stats
-              Row(
-                children: [
-                  Icon(
-                    Icons.favorite_border,
-                    size: 18,
-                    color: Colors.grey[600],
-                  ),
-                  const SizedBox(width: 4),
-                  Text(
-                    '${post.likes}',
-                    style: GoogleFonts.poppins(color: Colors.grey[600]),
-                  ),
-                  const SizedBox(width: 16),
-                  Icon(
-                    Icons.comment_outlined,
-                    size: 18,
-                    color: Colors.grey[600],
-                  ),
-                  const SizedBox(width: 4),
-                  Text(
-                    '${post.comments}',
-                    style: GoogleFonts.poppins(color: Colors.grey[600]),
-                  ),
-                ],
-              ),
-            ],
-          ),
+              ],
+            ),
+          ],
         ),
       ),
     );
@@ -371,36 +753,85 @@ class _CommunityScreenState extends State<CommunityScreen> {
               ),
             ),
             padding: const EdgeInsets.fromLTRB(20, 50, 20, 20),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.center,
+            child: Column(
               children: [
-                Text(
-                  'COMMUNITY FORUM',
-                  style: GoogleFonts.poppins(
-                    color: Colors.white,
-                    fontSize: 20,
-                    fontWeight: FontWeight.bold,
-                    letterSpacing: 2,
-                    shadows: [
-                      Shadow(
-                        color: Colors.white.withOpacity(0.5),
-                        blurRadius: 8,
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Text(
+                      'COMMUNITY FORUM',
+                      style: GoogleFonts.poppins(
+                        color: Colors.white,
+                        fontSize: 20,
+                        fontWeight: FontWeight.bold,
+                        letterSpacing: 2,
+                        shadows: [
+                          Shadow(
+                            color: Colors.white.withOpacity(0.5),
+                            blurRadius: 8,
+                          ),
+                        ],
                       ),
-                    ],
-                  ),
+                    ),
+                    const Spacer(),
+                    IconButton(
+                      icon: const Icon(Icons.search, color: Colors.white),
+                      onPressed: () {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(
+                            content: Text('Search coming soon!',
+                                style: GoogleFonts.poppins()),
+                            duration: const Duration(seconds: 1),
+                          ),
+                        );
+                      },
+                    ),
+                  ],
                 ),
-                const Spacer(),
-                IconButton(
-                  icon: const Icon(Icons.search, color: Colors.white),
-                  onPressed: () {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(
-                        content: Text('Search coming soon!',
-                            style: GoogleFonts.poppins()),
-                        duration: const Duration(seconds: 1),
-                      ),
-                    );
-                  },
+                const SizedBox(height: 12),
+                // Discord Community Button
+                InkWell(
+                  onTap: _openDiscord,
+                  borderRadius: BorderRadius.circular(25),
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+                    decoration: BoxDecoration(
+                      color: const Color(0xFF5865F2), // Discord brand color
+                      borderRadius: BorderRadius.circular(25),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black.withOpacity(0.2),
+                          blurRadius: 8,
+                          offset: const Offset(0, 2),
+                        ),
+                      ],
+                    ),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        const Icon(
+                          Icons.discord,
+                          color: Colors.white,
+                          size: 20,
+                        ),
+                        const SizedBox(width: 8),
+                        Text(
+                          'Join Discord Community',
+                          style: GoogleFonts.poppins(
+                            color: Colors.white,
+                            fontWeight: FontWeight.w600,
+                            fontSize: 13,
+                          ),
+                        ),
+                        const SizedBox(width: 4),
+                        const Icon(
+                          Icons.open_in_new,
+                          color: Colors.white70,
+                          size: 14,
+                        ),
+                      ],
+                    ),
+                  ),
                 ),
               ],
             ),

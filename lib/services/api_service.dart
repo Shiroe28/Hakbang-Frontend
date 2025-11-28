@@ -6,6 +6,7 @@ import 'package:image_picker/image_picker.dart';
 import '../models/career_model.dart';
 import '../models/module_model.dart';
 import '../models/assessment_model.dart';
+import '../models/post_model.dart';
 import '../config/network_config.dart';
 import 'storage_service.dart';
 
@@ -891,6 +892,107 @@ class ApiService {
       }
     } catch (e) {
       throw Exception('Error creating post: $e');
+    }
+  }
+
+  /// Like or unlike a community post
+  static Future<Map<String, dynamic>> toggleLikePost(String postId) async {
+    try {
+      print('📤 Toggling like for post: $postId');
+      
+      final response = await http.post(
+        Uri.parse('$baseUrl/community/posts/$postId/like'),
+        headers: await _getHeaders(needsAuth: true),
+      );
+
+      print('📥 Like toggle response: ${response.statusCode}');
+
+      if (response.statusCode == 200) {
+        return jsonDecode(response.body);
+      } else {
+        throw Exception('Failed to toggle like: ${response.statusCode}');
+      }
+    } catch (e) {
+      throw Exception('Error toggling like: $e');
+    }
+  }
+
+  /// Add a comment to a community post
+  static Future<Map<String, dynamic>> addCommentToPost({
+    required String postId,
+    required String text,
+  }) async {
+    try {
+      print('📤 Adding comment to post: $postId');
+      
+      final response = await http.post(
+        Uri.parse('$baseUrl/community/posts/$postId/comments'),
+        headers: await _getHeaders(needsAuth: true),
+        body: jsonEncode({
+          'text': text,
+        }),
+      );
+
+      print('📥 Add comment response: ${response.statusCode}');
+
+      if (response.statusCode == 200 || response.statusCode == 201) {
+        return jsonDecode(response.body);
+      } else {
+        throw Exception('Failed to add comment: ${response.statusCode}');
+      }
+    } catch (e) {
+      throw Exception('Error adding comment: $e');
+    }
+  }
+
+  /// Delete a community post (only owner can delete)
+  static Future<void> deletePost(String postId) async {
+    try {
+      print('📤 Deleting post: $postId');
+      
+      final response = await http.delete(
+        Uri.parse('$baseUrl/community/posts/$postId'),
+        headers: await _getHeaders(needsAuth: true),
+      );
+
+      print('📥 Delete post response: ${response.statusCode}');
+
+      if (response.statusCode != 200 && response.statusCode != 204) {
+        throw Exception('Failed to delete post: ${response.statusCode}');
+      }
+    } catch (e) {
+      throw Exception('Error deleting post: $e');
+    }
+  }
+
+  /// Get comments for a specific post
+  static Future<List<Comment>> getPostComments(String postId) async {
+    try {
+      print('📤 Fetching comments for post: $postId');
+      
+      final response = await http.get(
+        Uri.parse('$baseUrl/community/posts/$postId/comments'),
+        headers: await _getHeaders(needsAuth: true),
+      );
+
+      print('📥 Get comments response: ${response.statusCode}');
+
+      if (response.statusCode == 200) {
+        final decoded = jsonDecode(response.body);
+        List<dynamic> commentsList;
+        if (decoded is Map && decoded['data'] != null) {
+          commentsList = decoded['data'];
+        } else if (decoded is List) {
+          commentsList = decoded;
+        } else {
+          return [];
+        }
+        return commentsList.map((c) => Comment.fromJson(c)).toList();
+      } else {
+        throw Exception('Failed to get comments: ${response.statusCode}');
+      }
+    } catch (e) {
+      throw Exception('Error getting comments: $e');
     }
   }
 
