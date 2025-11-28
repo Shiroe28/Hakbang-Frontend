@@ -194,4 +194,4 @@ This project is part of the Hakbang educational platform.
 
 ---
 
-**Made with ❤️ using Flutter**
+**Made using Flutter**

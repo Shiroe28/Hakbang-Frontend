@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../services/storage_service.dart';
 import '../providers/user_provider.dart';
+import '../config/network_config.dart';
 import 'careers_screen.dart';
 import 'profile_screen.dart';
 import 'community_screen.dart';
@@ -171,7 +172,7 @@ class _MainScreenState extends State<MainScreen> {
 }
 
 // Home/Dashboard Tab
-class HomeTabScreen extends StatelessWidget {
+class HomeTabScreen extends StatefulWidget {
   final String role;
   final String? username;
   final Function(int)? onNavigateToTab;
@@ -184,7 +185,23 @@ class HomeTabScreen extends StatelessWidget {
   });
 
   @override
+  State<HomeTabScreen> createState() => _HomeTabScreenState();
+}
+
+class _HomeTabScreenState extends State<HomeTabScreen> {
+  @override
   Widget build(BuildContext context) {
+    // Get user data from provider for profile picture
+    final userProvider = Provider.of<UserProvider>(context);
+    final profilePicture = userProvider.user?.profilePicture;
+    
+    // Debug logging
+    print('🖼️ HomeTabScreen - User: ${userProvider.user?.username}');
+    print('🖼️ HomeTabScreen - Profile Picture: $profilePicture');
+    if (profilePicture != null && profilePicture.isNotEmpty) {
+      print('🖼️ HomeTabScreen - Full URL: ${NetworkConfig.baseUrlWithoutApi}$profilePicture');
+    }
+    
     return Scaffold(
       backgroundColor: Colors.white,
       body: Column(
@@ -259,11 +276,19 @@ class HomeTabScreen extends StatelessWidget {
                             radius: 25,
                             backgroundColor:
                                 const Color(0xFF2c6894).withOpacity(0.1),
-                            child: const Icon(
-                              Icons.person,
-                              size: 28,
-                              color: Color(0xFF2c6894),
-                            ),
+                            backgroundImage: profilePicture != null &&
+                                    profilePicture.isNotEmpty
+                                ? NetworkImage(
+                                    '${NetworkConfig.baseUrlWithoutApi}$profilePicture')
+                                : null,
+                            child: profilePicture == null ||
+                                    profilePicture.isEmpty
+                                ? const Icon(
+                                    Icons.person,
+                                    size: 28,
+                                    color: Color(0xFF2c6894),
+                                  )
+                                : null,
                           ),
                           const SizedBox(width: 12),
                           Expanded(
@@ -271,7 +296,7 @@ class HomeTabScreen extends StatelessWidget {
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
                                 Text(
-                                  'Welcome back${username != null ? ", $username" : ""}!',
+                                  'Welcome back${widget.username != null ? ", ${widget.username}" : ""}!',
                                   style: GoogleFonts.poppins(
                                     fontWeight: FontWeight.bold,
                                     fontSize: 16,
@@ -289,7 +314,7 @@ class HomeTabScreen extends StatelessWidget {
                                     borderRadius: BorderRadius.circular(12),
                                   ),
                                   child: Text(
-                                    role == 'student' ? 'Student' : 'Mentor',
+                                    widget.role == 'student' ? 'Student' : 'Mentor',
                                     style: GoogleFonts.poppins(
                                       color: Colors.white,
                                       fontWeight: FontWeight.bold,
@@ -338,7 +363,7 @@ class HomeTabScreen extends StatelessWidget {
                               ),
                               width: cardWidth,
                               onTap: () {
-                                onNavigateToTab?.call(1);
+                                widget.onNavigateToTab?.call(1);
                               },
                             ),
                             _buildGridCard(

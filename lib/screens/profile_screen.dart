@@ -3,6 +3,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
 import '../services/storage_service.dart';
 import '../providers/user_provider.dart';
+import '../config/network_config.dart';
 import 'login_screen.dart';
 import 'edit_profile_screen.dart';
 import 'notifications_screen.dart';
@@ -19,6 +20,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
   String? _username;
   String? _email;
   String? _role;
+  String? _profilePicture;
   bool _isLoading = true;
 
   @override
@@ -37,10 +39,13 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
     // Use data from UserProvider if available
     if (userProvider.user != null) {
+      print('🖼️ ProfileScreen - Loading user data from provider');
+      print('🖼️ ProfileScreen - Profile Picture: ${userProvider.user!.profilePicture}');
       setState(() {
         _username = userProvider.user!.username;
         _email = userProvider.user!.email;
         _role = userProvider.user!.role;
+        _profilePicture = userProvider.user!.profilePicture;
         _isLoading = false;
       });
       return;
@@ -103,6 +108,18 @@ class _ProfileScreenState extends State<ProfileScreen> {
       );
     }
 
+    // Listen to UserProvider for live updates
+    final userProvider = Provider.of<UserProvider>(context);
+    final profilePic = userProvider.user?.profilePicture ?? _profilePicture;
+    final displayRole = userProvider.user?.role ?? _role;
+    final displayUsername = userProvider.user?.username ?? _username;
+    final displayEmail = userProvider.user?.email ?? _email;
+    
+    print('🖼️ ProfileScreen build - profilePic: $profilePic');
+    if (profilePic != null && profilePic.isNotEmpty) {
+      print('🖼️ ProfileScreen - Full URL: ${NetworkConfig.baseUrlWithoutApi}$profilePic');
+    }
+
     return Scaffold(
       backgroundColor: Colors.white,
       body: Column(
@@ -145,19 +162,25 @@ class _ProfileScreenState extends State<ProfileScreen> {
                     radius: 60,
                     backgroundColor:
                         Theme.of(context).primaryColor.withValues(alpha: 0.2),
-                    child: Icon(
-                      _role == 'student'
-                          ? Icons.school_rounded
-                          : Icons.workspace_premium_rounded,
-                      size: 60,
-                      color: Theme.of(context).primaryColor,
-                    ),
+                    backgroundImage: profilePic != null && profilePic.isNotEmpty
+                        ? NetworkImage(
+                            '${NetworkConfig.baseUrlWithoutApi}$profilePic')
+                        : null,
+                    child: profilePic == null || profilePic.isEmpty
+                        ? Icon(
+                            displayRole == 'student'
+                                ? Icons.school_rounded
+                                : Icons.workspace_premium_rounded,
+                            size: 60,
+                            color: Theme.of(context).primaryColor,
+                          )
+                        : null,
                   ),
                   const SizedBox(height: 24),
 
                   // Username
                   Text(
-                    _username ?? 'User',
+                    displayUsername ?? 'User',
                     style: Theme.of(context).textTheme.headlineSmall?.copyWith(
                           fontWeight: FontWeight.bold,
                         ),
@@ -171,15 +194,15 @@ class _ProfileScreenState extends State<ProfileScreen> {
                       vertical: 8,
                     ),
                     decoration: BoxDecoration(
-                      color: _role == 'student'
+                      color: displayRole == 'student'
                           ? Colors.blue[100]
                           : Colors.purple[100],
                       borderRadius: BorderRadius.circular(20),
                     ),
                     child: Text(
-                      _role == 'student' ? 'STUDENT' : 'MENTOR',
+                      displayRole == 'student' ? 'STUDENT' : 'MENTOR',
                       style: TextStyle(
-                        color: _role == 'student'
+                        color: displayRole == 'student'
                             ? Colors.blue[900]
                             : Colors.purple[900],
                         fontWeight: FontWeight.bold,
@@ -197,19 +220,19 @@ class _ProfileScreenState extends State<ProfileScreen> {
                         _buildInfoTile(
                           icon: Icons.person_rounded,
                           title: 'Username',
-                          value: _username ?? 'N/A',
+                          value: displayUsername ?? 'N/A',
                         ),
                         const Divider(height: 1),
                         _buildInfoTile(
                           icon: Icons.email_rounded,
                           title: 'Email',
-                          value: _email ?? 'N/A',
+                          value: displayEmail ?? 'N/A',
                         ),
                         const Divider(height: 1),
                         _buildInfoTile(
                           icon: Icons.badge_rounded,
                           title: 'Role',
-                          value: _role == 'student' ? 'Student' : 'Mentor',
+                          value: displayRole == 'student' ? 'Student' : 'Mentor',
                         ),
                       ],
                     ),
@@ -240,8 +263,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
                             try {
                               // Always reload user to get latest data
-                              print(
-                                  '🔄 Reloading user data for edit profile...');
+                              print('🔄 Reloading user data for edit profile...');
                               await userProvider.loadCurrentUser();
 
                               // Close loading dialog
@@ -249,8 +271,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
                               // Check if user is loaded
                               if (userProvider.user != null) {
-                                print(
-                                    '✅ User loaded: ${userProvider.user!.username}');
+                                print('✅ User loaded: ${userProvider.user!.username}');
                                 final result = await Navigator.push(
                                   context,
                                   MaterialPageRoute(

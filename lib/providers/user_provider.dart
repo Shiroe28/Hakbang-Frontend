@@ -23,8 +23,10 @@ class UserProvider extends ChangeNotifier {
       
       if (data != null) {
         print('✅ User data received: ${data['username'] ?? data['name']}');
+        print('🖼️ ProfilePicture from API: ${data['profilePicture']}');
         _user = User.fromJson(Map<String, dynamic>.from(data));
         print('✅ User model created: ${_user?.username}');
+        print('🖼️ User model profilePicture: ${_user?.profilePicture}');
       } else {
         print('⚠️ getMe() returned null - no user data');
         _user = null;
