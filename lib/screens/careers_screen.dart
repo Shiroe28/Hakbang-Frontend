@@ -253,7 +253,9 @@ class _CareersScreenState extends State<CareersScreen> {
                     ),
                     const SizedBox(width: 6),
                     Text(
-                      career.salaryRange,
+                      career.salaryRange.isNotEmpty 
+                          ? career.salaryRange 
+                          : 'Salary not specified',
                       style: TextStyle(
                         color: Colors.green[700],
                         fontWeight: FontWeight.w600,
@@ -263,6 +265,33 @@ class _CareersScreenState extends State<CareersScreen> {
                   ],
                 ),
               ),
+              
+              // Skills Preview (if available)
+              if (career.hasSkills) ...[
+                const SizedBox(height: 12),
+                Row(
+                  children: [
+                    Icon(
+                      Icons.psychology_rounded,
+                      size: 16,
+                      color: Theme.of(context).primaryColor,
+                    ),
+                    const SizedBox(width: 6),
+                    Expanded(
+                      child: Text(
+                        career.skillsRequired.take(3).join(' • ') +
+                            (career.skillCount > 3 ? ' +${career.skillCount - 3} more' : ''),
+                        style: TextStyle(
+                          color: Colors.grey[600],
+                          fontSize: 12,
+                        ),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    ),
+                  ],
+                ),
+              ],
             ],
           ),
         ),

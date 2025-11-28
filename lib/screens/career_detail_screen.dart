@@ -137,6 +137,9 @@ class _CareerDetailScreenState extends State<CareerDetailScreen> {
 
                   const SizedBox(height: 8),
 
+                  // Skills Required Section
+                  _buildSkillsSection(),
+
                   // Learning Roadmap Section
                   _buildLearningRoadmap(),
                 ],
@@ -235,6 +238,194 @@ class _CareerDetailScreenState extends State<CareerDetailScreen> {
         ],
       ),
     );
+  }
+
+  Widget _buildSkillsSection() {
+    // If no skills are available, show a placeholder
+    if (!widget.career.hasSkills) {
+      return Padding(
+        padding: const EdgeInsets.fromLTRB(24, 16, 24, 8),
+        child: Container(
+          padding: const EdgeInsets.all(16),
+          decoration: BoxDecoration(
+            color: Colors.grey[50],
+            borderRadius: BorderRadius.circular(12),
+            border: Border.all(color: Colors.grey[200]!),
+          ),
+          child: Row(
+            children: [
+              Icon(
+                Icons.lightbulb_outline,
+                color: Colors.grey[400],
+                size: 24,
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Text(
+                  'Skills information coming soon...',
+                  style: TextStyle(
+                    color: Colors.grey[500],
+                    fontStyle: FontStyle.italic,
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+      );
+    }
+
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(24, 16, 24, 8),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // Section Title
+          Row(
+            children: [
+              Icon(
+                Icons.psychology_rounded,
+                color: Theme.of(context).primaryColor,
+                size: 28,
+              ),
+              const SizedBox(width: 12),
+              Text(
+                'Skills Required',
+                style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+                      fontWeight: FontWeight.bold,
+                    ),
+              ),
+              const Spacer(),
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+                decoration: BoxDecoration(
+                  color: Theme.of(context).primaryColor.withValues(alpha: 0.1),
+                  borderRadius: BorderRadius.circular(16),
+                ),
+                child: Text(
+                  '${widget.career.skillCount} skills',
+                  style: TextStyle(
+                    color: Theme.of(context).primaryColor,
+                    fontWeight: FontWeight.bold,
+                    fontSize: 12,
+                  ),
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 8),
+          Text(
+            'Master these skills to excel in this career',
+            style: TextStyle(
+              color: Colors.grey[600],
+              fontSize: 14,
+            ),
+          ),
+          const SizedBox(height: 16),
+          
+          // Skills Grid
+          Wrap(
+            spacing: 8,
+            runSpacing: 8,
+            children: widget.career.skillsRequired.map((skill) {
+              return _buildSkillChip(skill);
+            }).toList(),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildSkillChip(String skill) {
+    // Define colors for variety
+    final colors = [
+      Colors.blue,
+      Colors.green,
+      Colors.orange,
+      Colors.purple,
+      Colors.teal,
+      Colors.indigo,
+      Colors.pink,
+      Colors.cyan,
+    ];
+    
+    // Use skill's hash to consistently assign a color
+    final colorIndex = skill.hashCode.abs() % colors.length;
+    final color = colors[colorIndex];
+    
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+      decoration: BoxDecoration(
+        color: color.withValues(alpha: 0.1),
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(
+          color: color.withValues(alpha: 0.3),
+          width: 1,
+        ),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(
+            _getSkillIcon(skill),
+            size: 16,
+            color: color,
+          ),
+          const SizedBox(width: 6),
+          Text(
+            skill,
+            style: TextStyle(
+              color: color.shade700,
+              fontWeight: FontWeight.w500,
+              fontSize: 13,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  IconData _getSkillIcon(String skill) {
+    final skillLower = skill.toLowerCase();
+    
+    // Programming languages
+    if (skillLower.contains('python')) return Icons.code;
+    if (skillLower.contains('java')) return Icons.coffee;
+    if (skillLower.contains('javascript') || skillLower.contains('js')) return Icons.javascript;
+    if (skillLower.contains('html')) return Icons.html;
+    if (skillLower.contains('css')) return Icons.css;
+    if (skillLower.contains('sql')) return Icons.storage;
+    if (skillLower.contains('c++') || skillLower.contains('c#')) return Icons.code;
+    
+    // Frameworks & Tools
+    if (skillLower.contains('react') || skillLower.contains('angular') || skillLower.contains('vue')) return Icons.web;
+    if (skillLower.contains('node')) return Icons.dns;
+    if (skillLower.contains('flutter') || skillLower.contains('dart')) return Icons.phone_android;
+    if (skillLower.contains('docker') || skillLower.contains('kubernetes')) return Icons.cloud;
+    if (skillLower.contains('git')) return Icons.account_tree;
+    if (skillLower.contains('aws') || skillLower.contains('azure') || skillLower.contains('cloud')) return Icons.cloud_queue;
+    
+    // Data & AI
+    if (skillLower.contains('machine learning') || skillLower.contains('ml') || skillLower.contains('ai')) return Icons.psychology;
+    if (skillLower.contains('data')) return Icons.analytics;
+    if (skillLower.contains('database')) return Icons.storage;
+    
+    // Security & Network
+    if (skillLower.contains('security') || skillLower.contains('cyber')) return Icons.security;
+    if (skillLower.contains('network')) return Icons.hub;
+    
+    // Soft skills
+    if (skillLower.contains('communication')) return Icons.chat;
+    if (skillLower.contains('problem') || skillLower.contains('solving')) return Icons.lightbulb;
+    if (skillLower.contains('team') || skillLower.contains('collaboration')) return Icons.groups;
+    if (skillLower.contains('leadership')) return Icons.leaderboard;
+    
+    // Design
+    if (skillLower.contains('ui') || skillLower.contains('ux') || skillLower.contains('design')) return Icons.design_services;
+    if (skillLower.contains('figma') || skillLower.contains('photoshop')) return Icons.brush;
+    
+    // Default
+    return Icons.star_rounded;
   }
 
   Widget _buildLearningRoadmap() {

@@ -17,50 +17,106 @@ class _RecommendationQuizScreenState extends State<RecommendationQuizScreen> {
   final Map<int, int> _answers = {};
   bool _isSubmitting = false;
 
+  // 10 Real-Life Scenario Questions for Career Matching
   final List<QuizQuestion> _questions = [
+    // Question 1: Work Style Preference
     QuizQuestion(
-      question: 'What interests you most?',
+      question: 'When working on a group project, you usually...',
       options: [
-        'Building and creating things',
-        'Solving complex problems',
-        'Working with data and analytics',
-        'Designing visual experiences',
+        'Take charge and organize the team',
+        'Focus on your specific task independently',
+        'Help others and ensure everyone is aligned',
+        'Come up with creative ideas and solutions',
       ],
     ),
+    // Question 2: Problem-Solving Approach
     QuizQuestion(
-      question: 'What kind of projects excite you?',
+      question: 'When you encounter a difficult puzzle or problem, you...',
       options: [
-        'Mobile apps and user interfaces',
-        'Backend systems and APIs',
-        'Machine learning and AI',
-        'Web design and frontend',
+        'Break it down into smaller, logical steps',
+        'Look for patterns and connections',
+        'Research how others have solved similar problems',
+        'Try different approaches until something works',
       ],
     ),
+    // Question 3: Daily Habit - Learning
     QuizQuestion(
-      question: 'How do you prefer to work?',
+      question: 'In your free time, you prefer to...',
       options: [
-        'Independently on focused tasks',
-        'Collaborating with a team',
-        'Leading and managing projects',
-        'Researching and experimenting',
+        'Watch tutorials or learn new skills online',
+        'Play strategy games or solve puzzles',
+        'Create art, music, or design things',
+        'Read about technology trends and news',
       ],
     ),
+    // Question 4: Communication Style
     QuizQuestion(
-      question: 'What technical skills do you want to develop?',
+      question: 'When explaining something technical to a friend, you...',
       options: [
-        'Programming and coding',
-        'Database management',
-        'Cloud infrastructure',
-        'UI/UX design',
+        'Use simple analogies and visual examples',
+        'Give detailed step-by-step instructions',
+        'Show them by doing it yourself first',
+        'Share resources and let them figure it out',
       ],
     ),
+    // Question 5: Attention to Detail
     QuizQuestion(
-      question: 'What type of work environment appeals to you?',
+      question: 'When you notice a small error in an app or website, you...',
       options: [
-        'Fast-paced startup',
-        'Established tech company',
-        'Remote/flexible work',
-        'Creative agency',
+        'Feel bothered and want to fix it immediately',
+        'Think about how it could have been prevented',
+        'Wonder what caused the bug technically',
+        'Notice it but move on quickly',
+      ],
+    ),
+    // Question 6: Work Environment
+    QuizQuestion(
+      question: 'Your ideal workspace looks like...',
+      options: [
+        'A quiet corner with minimal distractions',
+        'A collaborative open space with teammates',
+        'A coffee shop or flexible location',
+        'A creative studio with visual inspiration',
+      ],
+    ),
+    // Question 7: Decision Making
+    QuizQuestion(
+      question: 'When making an important decision, you rely on...',
+      options: [
+        'Data, facts, and logical analysis',
+        'Intuition and past experiences',
+        'Input from people you trust',
+        'Weighing all pros and cons carefully',
+      ],
+    ),
+    // Question 8: Task Preference
+    QuizQuestion(
+      question: 'Which daily task sounds most enjoyable to you?',
+      options: [
+        'Organizing and optimizing a messy system',
+        'Building something new from scratch',
+        'Analyzing data to find insights',
+        'Designing a beautiful and user-friendly interface',
+      ],
+    ),
+    // Question 9: Challenge Response
+    QuizQuestion(
+      question: 'When faced with a completely new challenge, you...',
+      options: [
+        'Dive in and learn as you go',
+        'Research thoroughly before starting',
+        'Find someone experienced to guide you',
+        'Break it into smaller, manageable parts',
+      ],
+    ),
+    // Question 10: Long-term Motivation
+    QuizQuestion(
+      question: 'What motivates you most in your work?',
+      options: [
+        'Creating things that people actually use',
+        'Solving complex problems others cannot',
+        'Making things look beautiful and intuitive',
+        'Seeing measurable results from your efforts',
       ],
     ),
   ];
@@ -207,34 +263,37 @@ class _RecommendationQuizScreenState extends State<RecommendationQuizScreen> {
             ),
             child: Column(
               children: [
-                // Progress dots
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: List.generate(
-                    _questions.length,
-                    (index) => Container(
-                      margin: const EdgeInsets.symmetric(horizontal: 4),
-                      width: index <= _currentQuestionIndex ? 32 : 24,
-                      height: 8,
-                      decoration: BoxDecoration(
-                        color: index < _currentQuestionIndex
-                            ? const Color(0xFF2c6894)
-                            : index == _currentQuestionIndex
-                                ? const Color(0xFF2c6894)
-                                : Colors.grey[300],
-                        borderRadius: BorderRadius.circular(4),
-                      ),
-                    ),
+                // Progress bar (better for 10 questions)
+                ClipRRect(
+                  borderRadius: BorderRadius.circular(8),
+                  child: LinearProgressIndicator(
+                    value: (_currentQuestionIndex + 1) / _questions.length,
+                    backgroundColor: Colors.grey[200],
+                    valueColor: const AlwaysStoppedAnimation<Color>(Color(0xFF2c6894)),
+                    minHeight: 8,
                   ),
                 ),
-                const SizedBox(height: 8),
-                Text(
-                  'Question ${_currentQuestionIndex + 1} of ${_questions.length}',
-                  style: GoogleFonts.poppins(
-                    fontSize: 13,
-                    color: Colors.grey[600],
-                    fontWeight: FontWeight.w500,
-                  ),
+                const SizedBox(height: 12),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text(
+                      'Question ${_currentQuestionIndex + 1} of ${_questions.length}',
+                      style: GoogleFonts.poppins(
+                        fontSize: 13,
+                        color: Colors.grey[600],
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
+                    Text(
+                      '${((_currentQuestionIndex + 1) / _questions.length * 100).toInt()}% Complete',
+                      style: GoogleFonts.poppins(
+                        fontSize: 13,
+                        color: const Color(0xFF2c6894),
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                  ],
                 ),
               ],
             ),
