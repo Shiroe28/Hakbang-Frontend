@@ -395,7 +395,7 @@ class _RecommendationQuizScreenState extends State<RecommendationQuizScreen> {
                           ? 'Get Recommendations'
                           : 'Next',
                       style: GoogleFonts.poppins(
-                        fontSize: 15,
+                        fontSize: _currentQuestionIndex == _questions.length - 1 ? 13 : 15,
                         fontWeight: FontWeight.w600,
                       ),
                     ),

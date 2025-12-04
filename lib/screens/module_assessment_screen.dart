@@ -485,7 +485,7 @@ class _ModuleAssessmentScreenState extends State<ModuleAssessmentScreen> {
     return Scaffold(
       appBar: AppBar(
         title: Text(_results == null ? 'Assessment' : 'Results'),
-        backgroundColor: Colors.blue,
+        backgroundColor: const Color(0xFF2c6894),
         foregroundColor: Colors.white,
       ),
       body: _isLoading
@@ -513,12 +513,8 @@ class _ModuleAssessmentScreenState extends State<ModuleAssessmentScreen> {
         Container(
           width: double.infinity,
           padding: const EdgeInsets.all(20),
-          decoration: BoxDecoration(
-            gradient: LinearGradient(
-              colors: [Colors.blue.shade600, Colors.blue.shade400],
-              begin: Alignment.topLeft,
-              end: Alignment.bottomRight,
-            ),
+          decoration: const BoxDecoration(
+            color: Color(0xFF2c6894),
           ),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -588,7 +584,7 @@ class _ModuleAssessmentScreenState extends State<ModuleAssessmentScreen> {
                     Container(
                       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
                       decoration: BoxDecoration(
-                        color: Colors.blue,
+                        color: const Color(0xFF2c6894),
                         borderRadius: BorderRadius.circular(20),
                       ),
                       child: Text(
@@ -633,10 +629,10 @@ class _ModuleAssessmentScreenState extends State<ModuleAssessmentScreen> {
                             padding: const EdgeInsets.all(16),
                             decoration: BoxDecoration(
                               color: isSelected
-                                  ? Colors.blue.withOpacity(0.1)
+                                  ? const Color(0xFF2c6894).withOpacity(0.1)
                                   : Colors.grey.shade50,
                               border: Border.all(
-                                color: isSelected ? Colors.blue : Colors.grey.shade300,
+                                color: isSelected ? const Color(0xFF2c6894) : Colors.grey.shade300,
                                 width: isSelected ? 2 : 1,
                               ),
                               borderRadius: BorderRadius.circular(12),
@@ -649,10 +645,10 @@ class _ModuleAssessmentScreenState extends State<ModuleAssessmentScreen> {
                                   decoration: BoxDecoration(
                                     shape: BoxShape.circle,
                                     border: Border.all(
-                                      color: isSelected ? Colors.blue : Colors.grey,
+                                      color: isSelected ? const Color(0xFF2c6894) : Colors.grey,
                                       width: 2,
                                     ),
-                                    color: isSelected ? Colors.blue : Colors.transparent,
+                                    color: isSelected ? const Color(0xFF2c6894) : Colors.transparent,
                                   ),
                                   child: isSelected
                                       ? const Icon(
@@ -669,7 +665,7 @@ class _ModuleAssessmentScreenState extends State<ModuleAssessmentScreen> {
                                     style: TextStyle(
                                       fontSize: 16,
                                       fontWeight: isSelected ? FontWeight.w600 : FontWeight.normal,
-                                      color: isSelected ? Colors.blue.shade900 : Colors.black87,
+                                      color: isSelected ? const Color(0xFF2c6894) : Colors.black87,
                                     ),
                                   ),
                                 ),
@@ -750,7 +746,7 @@ class _ModuleAssessmentScreenState extends State<ModuleAssessmentScreen> {
                             }
                           },
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: isLastQuestion ? Colors.green : Colors.blue,
+                      backgroundColor: const Color(0xFF2c6894),
                       foregroundColor: Colors.white,
                       padding: const EdgeInsets.symmetric(vertical: 16),
                       shape: RoundedRectangleBorder(
@@ -822,7 +818,7 @@ class _ModuleAssessmentScreenState extends State<ModuleAssessmentScreen> {
               decoration: BoxDecoration(
                 gradient: LinearGradient(
                   colors: passed
-                      ? [Colors.green.shade400, Colors.green.shade600]
+                      ? [const Color(0xFF2c6894), const Color(0xFF1e4a63)]
                       : [Colors.orange.shade400, Colors.orange.shade600],
                   begin: Alignment.topLeft,
                   end: Alignment.bottomRight,
@@ -887,7 +883,7 @@ class _ModuleAssessmentScreenState extends State<ModuleAssessmentScreen> {
                 children: [
                   const Row(
                     children: [
-                      Icon(Icons.list_alt, color: Colors.blue),
+                      Icon(Icons.list_alt, color: Color(0xFF2c6894)),
                       SizedBox(width: 8),
                       Text(
                         'Question Breakdown',
@@ -1106,7 +1102,7 @@ class _ModuleAssessmentScreenState extends State<ModuleAssessmentScreen> {
               icon: const Icon(Icons.check),
               label: const Text('Continue'),
               style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.blue,
+                backgroundColor: const Color(0xFF2c6894),
                 foregroundColor: Colors.white,
                 padding: const EdgeInsets.symmetric(vertical: 16),
                 shape: RoundedRectangleBorder(

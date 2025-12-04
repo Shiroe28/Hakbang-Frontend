@@ -809,38 +809,21 @@ class _CommunityScreenState extends State<CommunityScreen> {
             padding: const EdgeInsets.fromLTRB(20, 50, 20, 20),
             child: Column(
               children: [
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Text(
-                      'COMMUNITY FORUM',
-                      style: GoogleFonts.poppins(
-                        color: Colors.white,
-                        fontSize: 20,
-                        fontWeight: FontWeight.bold,
-                        letterSpacing: 2,
-                        shadows: [
-                          Shadow(
-                            color: Colors.white.withOpacity(0.5),
-                            blurRadius: 8,
-                          ),
-                        ],
+                // Centered header
+                Text(
+                  'COMMUNITY FORUM',
+                  style: GoogleFonts.poppins(
+                    color: Colors.white,
+                    fontSize: 20,
+                    fontWeight: FontWeight.bold,
+                    letterSpacing: 2,
+                    shadows: [
+                      Shadow(
+                        color: Colors.white.withOpacity(0.5),
+                        blurRadius: 8,
                       ),
-                    ),
-                    const Spacer(),
-                    IconButton(
-                      icon: const Icon(Icons.search, color: Colors.white),
-                      onPressed: () {
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(
-                            content: Text('Search coming soon!',
-                                style: GoogleFonts.poppins()),
-                            duration: const Duration(seconds: 1),
-                          ),
-                        );
-                      },
-                    ),
-                  ],
+                    ],
+                  ),
                 ),
                 const SizedBox(height: 12),
                 // Discord Community Button
