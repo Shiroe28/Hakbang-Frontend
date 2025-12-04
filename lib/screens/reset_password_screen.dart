@@ -104,7 +104,7 @@ class _ResetPasswordScreenState extends State<ResetPasswordScreen> {
           onPressed: () => Navigator.pop(context),
         ),
         title: const Text(
-          'Forgot Password',
+          'Reset Password',
           style: TextStyle(
             color: Colors.black,
             fontWeight: FontWeight.bold,
@@ -133,7 +133,7 @@ class _ResetPasswordScreenState extends State<ResetPasswordScreen> {
 
                 // Title
                 const Text(
-                  'Reset Your Password',
+                  'Enter Reset Code',
                   style: TextStyle(
                     fontSize: 24,
                     fontWeight: FontWeight.bold,
@@ -145,7 +145,7 @@ class _ResetPasswordScreenState extends State<ResetPasswordScreen> {
 
                 // Description
                 Text(
-                  'Enter you email address and we\'ll send you a code to reset your password.',
+                  'We sent a reset code to ${widget.email}. Enter the code and your new password below.',
                   style: TextStyle(
                     fontSize: 14,
                     color: Colors.grey[600],
@@ -153,24 +153,33 @@ class _ResetPasswordScreenState extends State<ResetPasswordScreen> {
                   textAlign: TextAlign.center,
                 ),
 
-                const SizedBox(height: 40),
+                const SizedBox(height: 32),
 
-                // Email Field (read-only, showing the email)
+                // Reset Code Field
                 TextFormField(
-                  initialValue: widget.email,
-                  enabled: false,
-                  style: const TextStyle(fontFamily: 'GlacialIndifference'),
+                  controller: _codeController,
+                  keyboardType: TextInputType.number,
+                  style: const TextStyle(
+                    fontFamily: 'GlacialIndifference',
+                    fontSize: 20,
+                    letterSpacing: 8,
+                    fontWeight: FontWeight.bold,
+                  ),
+                  textAlign: TextAlign.center,
+                  maxLength: 6,
                   decoration: InputDecoration(
-                    hintText: 'Email Address',
-                    hintStyle: const TextStyle(
-                      color: Colors.grey,
+                    hintText: '000000',
+                    hintStyle: TextStyle(
+                      color: Colors.grey[400],
+                      letterSpacing: 8,
                     ),
+                    counterText: '', // Hide the counter
                     prefixIcon: Container(
                       padding: const EdgeInsets.all(12),
-                      child: const Icon(Icons.email_outlined, size: 20),
+                      child: const Icon(Icons.pin_outlined, size: 20),
                     ),
                     filled: true,
-                    fillColor: Colors.grey[200],
+                    fillColor: Colors.grey[100],
                     border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(30),
                       borderSide: BorderSide.none,
@@ -180,11 +189,99 @@ class _ResetPasswordScreenState extends State<ResetPasswordScreen> {
                       vertical: 16,
                     ),
                   ),
+                  validator: (value) {
+                    if (value == null || value.isEmpty) {
+                      return 'Please enter the reset code';
+                    }
+                    if (value.length < 4) {
+                      return 'Code must be at least 4 digits';
+                    }
+                    return null;
+                  },
+                  enabled: !_isLoading,
+                ),
+
+                const SizedBox(height: 16),
+
+                // New Password Field
+                TextFormField(
+                  controller: _passwordController,
+                  obscureText: true,
+                  style: const TextStyle(fontFamily: 'GlacialIndifference'),
+                  decoration: InputDecoration(
+                    hintText: 'New Password',
+                    hintStyle: const TextStyle(
+                      color: Colors.grey,
+                    ),
+                    prefixIcon: Container(
+                      padding: const EdgeInsets.all(12),
+                      child: const Icon(Icons.lock_outline, size: 20),
+                    ),
+                    filled: true,
+                    fillColor: Colors.grey[100],
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(30),
+                      borderSide: BorderSide.none,
+                    ),
+                    contentPadding: const EdgeInsets.symmetric(
+                      horizontal: 20,
+                      vertical: 16,
+                    ),
+                  ),
+                  validator: (value) {
+                    if (value == null || value.isEmpty) {
+                      return 'Please enter a new password';
+                    }
+                    if (value.length < 6) {
+                      return 'Password must be at least 6 characters';
+                    }
+                    return null;
+                  },
+                  enabled: !_isLoading,
+                ),
+
+                const SizedBox(height: 16),
+
+                // Confirm Password Field
+                TextFormField(
+                  controller: _confirmPasswordController,
+                  obscureText: true,
+                  style: const TextStyle(fontFamily: 'GlacialIndifference'),
+                  decoration: InputDecoration(
+                    hintText: 'Confirm New Password',
+                    hintStyle: const TextStyle(
+                      color: Colors.grey,
+                    ),
+                    prefixIcon: Container(
+                      padding: const EdgeInsets.all(12),
+                      child: const Icon(Icons.lock_outline, size: 20),
+                    ),
+                    filled: true,
+                    fillColor: Colors.grey[100],
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(30),
+                      borderSide: BorderSide.none,
+                    ),
+                    contentPadding: const EdgeInsets.symmetric(
+                      horizontal: 20,
+                      vertical: 16,
+                    ),
+                  ),
+                  validator: (value) {
+                    if (value == null || value.isEmpty) {
+                      return 'Please confirm your password';
+                    }
+                    if (value != _passwordController.text) {
+                      return 'Passwords do not match';
+                    }
+                    return null;
+                  },
+                  enabled: !_isLoading,
                 ),
 
                 const SizedBox(height: 24),
 
-                // Send Code Button
+                // Reset Password Button
                 ElevatedButton(
                   onPressed: _isLoading ? null : _resetPassword,
                   style: ElevatedButton.styleFrom(
@@ -206,7 +303,7 @@ class _ResetPasswordScreenState extends State<ResetPasswordScreen> {
                           ),
                         )
                       : const Text(
-                          'Send Reset Code',
+                          'Reset Password',
                           style: TextStyle(
                             fontSize: 16,
                             fontWeight: FontWeight.bold,
@@ -252,10 +349,10 @@ class _ResetPasswordScreenState extends State<ResetPasswordScreen> {
                 Container(
                   padding: const EdgeInsets.all(16),
                   decoration: BoxDecoration(
-                    color: Colors.grey[100],
+                    color: Colors.blue[50],
                     borderRadius: BorderRadius.circular(12),
                     border: Border.all(
-                      color: Colors.grey[300]!,
+                      color: Colors.blue[200]!,
                       width: 1,
                     ),
                   ),
@@ -264,20 +361,57 @@ class _ResetPasswordScreenState extends State<ResetPasswordScreen> {
                     children: [
                       Icon(
                         Icons.info_outline,
-                        color: Colors.grey[700],
+                        color: Colors.blue[700],
                         size: 20,
                       ),
                       const SizedBox(width: 12),
                       Expanded(
                         child: Text(
-                          'The reset code will expire in 15 minutes. If you don\'t receive it, check your spam folder.',
+                          'Check your email for the 6-digit reset code. The code expires in 15 minutes.',
                           style: TextStyle(
-                            color: Colors.grey[700],
+                            color: Colors.blue[700],
                             fontSize: 12,
                           ),
                         ),
                       ),
                     ],
+                  ),
+                ),
+
+                const SizedBox(height: 16),
+
+                // Resend Code Button
+                TextButton(
+                  onPressed: _isLoading
+                      ? null
+                      : () async {
+                          try {
+                            await ApiService.forgotPassword(widget.email);
+                            if (mounted) {
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                const SnackBar(
+                                  content: Text('New reset code sent to your email!'),
+                                  backgroundColor: Colors.green,
+                                ),
+                              );
+                            }
+                          } catch (e) {
+                            if (mounted) {
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                SnackBar(
+                                  content: Text('Error: ${e.toString().replaceAll('Exception: ', '')}'),
+                                  backgroundColor: Colors.red,
+                                ),
+                              );
+                            }
+                          }
+                        },
+                  child: Text(
+                    'Didn\'t receive the code? Resend',
+                    style: TextStyle(
+                      color: _isLoading ? Colors.grey : const Color(0xFF2c6894),
+                      fontWeight: FontWeight.w600,
+                    ),
                   ),
                 ),
               ],
