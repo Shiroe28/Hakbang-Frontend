@@ -20,7 +20,7 @@ class _AIChatbotScreenState extends State<AIChatbotScreen> {
     super.initState();
     // Add welcome message
     _messages.add(ChatMessage(
-      text: "Hello! I'm your AI Career Mentor. I can help you with:\n\n"
+      text: "Hello! I'm your AI Hakbang Career Mentor. I can help you with:\n\n"
           "• Choosing the right IT career path\n"
           "• Learning recommendations\n"
           "• Study tips and motivation\n"
@@ -144,10 +144,14 @@ class _AIChatbotScreenState extends State<AIChatbotScreen> {
                   ),
                 ),
                 const SizedBox(width: 8),
-                const Icon(
-                  Icons.smart_toy,
-                  color: Colors.white,
-                  size: 28,
+                ClipRRect(
+                  borderRadius: BorderRadius.circular(8),
+                  child: Image.asset(
+                    'assets/images/openai-logo.jpg',
+                    width: 32,
+                    height: 32,
+                    fit: BoxFit.cover,
+                  ),
                 ),
                 const SizedBox(width: 8),
                 Expanded(
@@ -179,10 +183,16 @@ class _AIChatbotScreenState extends State<AIChatbotScreen> {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         CircleAvatar(
-                          backgroundColor:
-                              const Color(0xFF2c6894).withOpacity(0.2),
-                          child: const Icon(Icons.smart_toy,
-                              color: Color(0xFF2c6894)),
+                          backgroundColor: Colors.white,
+                          radius: 20,
+                          child: ClipOval(
+                            child: Image.asset(
+                              'assets/images/openai-logo.jpg',
+                              width: 36,
+                              height: 36,
+                              fit: BoxFit.cover,
+                            ),
+                          ),
                         ),
                         const SizedBox(width: 12),
                         Container(
@@ -315,8 +325,16 @@ class _AIChatbotScreenState extends State<AIChatbotScreen> {
         children: [
           if (!message.isUser) ...[
             CircleAvatar(
-              backgroundColor: Colors.blue.withValues(alpha: 0.2),
-              child: const Icon(Icons.smart_toy, color: Colors.blue),
+              backgroundColor: Colors.white,
+              radius: 20,
+              child: ClipOval(
+                child: Image.asset(
+                  'assets/images/openai-logo.jpg',
+                  width: 36,
+                  height: 36,
+                  fit: BoxFit.cover,
+                ),
+              ),
             ),
             const SizedBox(width: 12),
           ],

@@ -41,5 +41,6 @@ flutter:
   
   # Assets
   assets:
-    - assets/images/logo.png 
+    - assets/images/logo.png
+    - assets/images/openai-logo.jpg
 

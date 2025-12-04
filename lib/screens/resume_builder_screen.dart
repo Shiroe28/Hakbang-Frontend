@@ -262,8 +262,15 @@ ${_projectsController.text}
                       ),
                       child: Row(
                         children: [
-                          const Icon(Icons.smart_toy,
-                              size: 40, color: Color(0xFF2c6894)),
+                          ClipRRect(
+                            borderRadius: BorderRadius.circular(10),
+                            child: Image.asset(
+                              'assets/images/openai-logo.jpg',
+                              width: 48,
+                              height: 48,
+                              fit: BoxFit.cover,
+                            ),
+                          ),
                           const SizedBox(width: 16),
                           Expanded(
                             child: Column(

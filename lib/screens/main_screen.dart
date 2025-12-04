@@ -415,9 +415,9 @@ class _HomeTabScreenState extends State<HomeTabScreen> {
                                 );
                               },
                             ),
-                            _buildGridCard(
+                            _buildImageCard(
                               context,
-                              icon: Icons.smart_toy_rounded,
+                              imagePath: 'assets/images/openai-logo.jpg',
                               title: 'AI Mentor',
                               description: 'Chat for career guidance',
                               gradient: const LinearGradient(
@@ -436,9 +436,9 @@ class _HomeTabScreenState extends State<HomeTabScreen> {
                                 );
                               },
                             ),
-                            _buildGridCard(
+                            _buildImageCard(
                               context,
-                              icon: Icons.description_rounded,
+                              imagePath: 'assets/images/openai-logo.jpg',
                               title: 'AI Feedback Resume',
                               description: 'AI-powered feedback',
                               gradient: const LinearGradient(
@@ -533,6 +533,80 @@ class _HomeTabScreenState extends State<HomeTabScreen> {
                   icon,
                   size: 32,
                   color: Colors.white,
+                ),
+              ),
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    title,
+                    style: GoogleFonts.poppins(
+                      fontWeight: FontWeight.bold,
+                      fontSize: 15,
+                      color: Colors.white,
+                      height: 1.2,
+                    ),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                  const SizedBox(height: 4),
+                  Text(
+                    description,
+                    style: GoogleFonts.poppins(
+                      fontSize: 12,
+                      color: Colors.white.withOpacity(0.9),
+                      height: 1.3,
+                    ),
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                ],
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildImageCard(
+    BuildContext context, {
+    required String imagePath,
+    required String title,
+    required String description,
+    required Gradient gradient,
+    required double width,
+    VoidCallback? onTap,
+  }) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        width: width,
+        height: 160,
+        decoration: BoxDecoration(
+          gradient: gradient,
+          borderRadius: BorderRadius.circular(20),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withOpacity(0.15),
+              blurRadius: 10,
+              offset: const Offset(0, 4),
+            ),
+          ],
+        ),
+        child: Padding(
+          padding: const EdgeInsets.all(20),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              ClipRRect(
+                borderRadius: BorderRadius.circular(12),
+                child: Image.asset(
+                  imagePath,
+                  width: 52,
+                  height: 52,
+                  fit: BoxFit.contain,
                 ),
               ),
               Column(
