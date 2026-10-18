@@ -192,6 +192,11 @@ This project is part of the Hakbang educational platform.
 - **Student**: Explore careers, learn modules, track progress
 - **Mentor**: Guide students, answer questions, provide support
 
+## Contributors
+
+- Sam Richmond Go
+- Jenrick Ambalong
+
 ---
 
 **Made using Flutter**
